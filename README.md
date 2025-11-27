@@ -10,11 +10,13 @@
 
 **API REST profissional para conversão de documentos Word para PDF com substituição inteligente de tags**
 
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Maxwbh/doc2pdf)
+
 [Funcionalidades](#funcionalidades) •
 [Instalação](#instalação) •
 [Uso](#como-usar) •
 [API](#endpoints) •
-[Deploy](#deploy-no-render) •
+[Deploy](#-deploy-rápido) •
 [Contribuir](CONTRIBUTING.md)
 
 </div>
@@ -37,6 +39,38 @@ API Flask moderna e robusta que permite converter documentos Word (.DOC/.DOCX) p
 - ✅ Preserva formatação do documento original
 - ✅ Pronto para deploy no Render com Docker
 - ✅ Coleção completa para Postman incluída
+
+---
+
+## ☁️ Deploy Rápido
+
+Escolha a opção mais adequada para você:
+
+### Opção 1: Render (1 Clique) ⭐ Mais Fácil
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/Maxwbh/doc2pdf)
+
+**Pronto em 5 minutos!** Deploy automático com configuração zero.
+
+📖 **Guia completo:** [RENDER_GUIDE.md](RENDER_GUIDE.md)
+
+### Opção 2: Docker (Localmente)
+
+```bash
+docker-compose up -d
+# API rodando em http://localhost:5000
+```
+
+📖 **Guia completo:** [DOCKER_GUIDE.md](DOCKER_GUIDE.md)
+
+### Opção 3: pip (Desenvolvimento)
+
+```bash
+pip install git+https://github.com/Maxwbh/doc2pdf.git
+python app.py
+```
+
+---
 
 ## 🚀 Teste Rápido com Postman
 
@@ -540,8 +574,12 @@ in the Software without restriction...
 
 - [Changelog](CHANGELOG.md) - Histórico de versões
 - [Contributing](CONTRIBUTING.md) - Guia de contribuição
+- [Render Guide](RENDER_GUIDE.md) - Deploy no Render (1 clique)
+- [Docker Guide](DOCKER_GUIDE.md) - Instalação com Docker
+- [Test Examples](TEST_EXAMPLES.md) - Exemplos de JSON
 - [Postman Collection](DOC2PDF_API.postman_collection.json) - Testes da API
-- [Examples](example_usage.py) - Exemplos de uso
+- [Postman Guide](POSTMAN_GUIDE.md) - Como usar Postman
+- [Examples](example_usage.py) - Exemplos de uso em Python
 
 ---
 

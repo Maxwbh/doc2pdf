@@ -1,11 +1,69 @@
+# Render Blueprint para DOC2PDF API
+# Deploy automático com um clique
+# Autor: Maxwell da Silva Oliveira - M&S do Brasil LTDA
+
 services:
+  # API Principal
   - type: web
     name: doc2pdf-api
     runtime: docker
-    plan: free
+    plan: free  # Opções: free, starter, standard, pro
+    region: oregon  # Ou: ohio, frankfurt, singapore
+    branch: main
+    dockerfilePath: ./Dockerfile
+
+    # Health Check
     healthCheckPath: /health
+
+    # Variáveis de Ambiente
     envVars:
       - key: PORT
         value: 5000
       - key: PYTHONUNBUFFERED
         value: 1
+      - key: FLASK_ENV
+        value: production
+
+    # Auto Deploy
+    autoDeploy: true
+
+    # Configurações de Build
+    buildCommand: echo "Building with Docker..."
+
+    # Configurações do Container
+    numInstances: 1
+
+    # Headers customizados (opcional)
+    headers:
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-XSS-Protection
+        value: 1; mode=block
+
+    # CORS (já configurado no Flask)
+
+    # Notificações (opcional)
+    # notifications:
+    #   - events:
+    #       - deploy-started
+    #       - deploy-succeeded
+    #       - deploy-failed
+    #     email:
+    #       - maxwbh@gmail.com
+
+# Configurações adicionais (opcional)
+# databases:
+#   - name: doc2pdf-redis
+#     plan: free
+#     region: oregon
+
+# Volumes persistentes (se necessário)
+# - name: doc2pdf-storage
+#   mountPath: /data
+#   sizeGB: 1
+
