@@ -18,10 +18,22 @@ Esta API recebe um arquivo Word em Base64, substitui tags personalizadas (ex: `%
 - ✅ Recebe documento .DOC/.DOCX em Base64
 - ✅ Substitui tags no formato `%%TAG%%` por valores fornecidos
 - ✅ Converte documento para PDF
-- ✅ Retorna PDF em Base64
+- ✅ Retorna PDF em Base64 ou como arquivo direto
 - ✅ Suporte para tags em parágrafos e tabelas
 - ✅ Preserva formatação do documento original
 - ✅ Pronto para deploy no Render com Docker
+- ✅ Coleção completa para Postman incluída
+
+## 🚀 Teste Rápido com Postman
+
+Incluímos uma coleção completa do Postman para facilitar os testes:
+
+1. Importe `DOC2PDF_API.postman_collection.json` no Postman
+2. Configure a variável `base_url` (ex: `http://localhost:5000`)
+3. Adicione seu documento em Base64 na variável `document_base64`
+4. Teste todos os endpoints com exemplos prontos
+
+📖 **Guia completo:** Ver `POSTMAN_GUIDE.md` para instruções detalhadas
 
 ## Endpoints
 
@@ -63,6 +75,35 @@ Converte documento Word para PDF com substituição de tags.
 }
 ```
 
+### `POST /convert-file`
+Converte documento Word para PDF com substituição de tags e retorna o arquivo PDF diretamente.
+
+**Request:**
+```json
+{
+  "document": "BASE64_ENCODED_DOC_FILE",
+  "replacements": {
+    "NOME": "Jose da Silva",
+    "ENDERECO": "Rua qualquer coisa, Nro1, Bairro das colinas, São Paulo/SP - CEP: 48.4839-877",
+    "DATANASCIMENTO": "01/01/1990",
+    "CPF": "123.456.789-00"
+  },
+  "filename": "contrato_jose_silva.pdf"
+}
+```
+
+**Response:**
+- Retorna arquivo PDF diretamente com `Content-Type: application/pdf`
+- Pode ser visualizado no navegador ou baixado automaticamente
+- Header `Content-Disposition: attachment; filename="contrato_jose_silva.pdf"`
+
+**Response (Erro):**
+```json
+{
+  "error": "Descrição do erro"
+}
+```
+
 ## Como Usar
 
 ### 1. Prepare seu Documento Word
@@ -88,6 +129,8 @@ with open('documento.docx', 'rb') as file:
 ```
 
 ### 3. Faça a Requisição à API
+
+#### Opção A: Retorno em Base64 (endpoint `/convert`)
 
 ```python
 import requests
@@ -126,8 +169,44 @@ else:
     print(f"Erro: {response.json()}")
 ```
 
+#### Opção B: Retorno como Arquivo PDF (endpoint `/convert-file`)
+
+```python
+import requests
+import base64
+
+# Prepara os dados
+data = {
+    "document": doc_base64,
+    "replacements": {
+        "NOME": "Jose da Silva",
+        "ENDERECO": "Rua qualquer coisa, Nro1, Bairro das colinas, São Paulo/SP - CEP: 48.4839-877",
+        "DATANASCIMENTO": "01/01/1990",
+        "CPF": "123.456.789-00"
+    },
+    "filename": "contrato_jose_silva.pdf"  # Opcional
+}
+
+# Faz a requisição
+response = requests.post(
+    'https://sua-api.render.com/convert-file',
+    json=data,
+    headers={'Content-Type': 'application/json'}
+)
+
+# Processa a resposta
+if response.status_code == 200:
+    # Salva o PDF diretamente
+    with open('documento_final.pdf', 'wb') as f:
+        f.write(response.content)
+    print("PDF gerado com sucesso!")
+else:
+    print(f"Erro: {response.json()}")
+```
+
 ### 4. Exemplo com cURL
 
+#### Retorno em Base64:
 ```bash
 curl -X POST https://sua-api.render.com/convert \
   -H "Content-Type: application/json" \
@@ -139,6 +218,22 @@ curl -X POST https://sua-api.render.com/convert \
       "DATANASCIMENTO": "01/01/1990"
     }
   }'
+```
+
+#### Retorno como Arquivo PDF (salva diretamente):
+```bash
+curl -X POST https://sua-api.render.com/convert-file \
+  -H "Content-Type: application/json" \
+  -d '{
+    "document": "BASE64_STRING_AQUI",
+    "replacements": {
+      "NOME": "Jose da Silva",
+      "ENDERECO": "Rua qualquer coisa, Nro1",
+      "DATANASCIMENTO": "01/01/1990"
+    },
+    "filename": "contrato.pdf"
+  }' \
+  --output documento.pdf
 ```
 
 ## Instalação Local

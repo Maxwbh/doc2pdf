@@ -6,7 +6,7 @@ Email: maxwbh@gmail.com
 LinkedIn: /maxwbh
 """
 
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_file
 from flask_cors import CORS
 import base64
 import io
@@ -211,6 +211,95 @@ def convert_document():
         return jsonify({'error': f'Erro ao processar documento: {str(e)}'}), 500
 
 
+@app.route('/convert-file', methods=['POST'])
+def convert_document_file():
+    """
+    Endpoint para conversão de documentos retornando arquivo PDF
+
+    Espera JSON com:
+    - document: string Base64 do arquivo .DOC
+    - replacements: objeto com as substituições {tag: valor}
+    - filename (opcional): nome do arquivo PDF a ser gerado
+
+    Retorna:
+    - Arquivo PDF para download/visualização
+    """
+    temp_dir = None
+    try:
+        # Valida requisição
+        if not request.is_json:
+            return jsonify({'error': 'Content-Type deve ser application/json'}), 400
+
+        data = request.get_json()
+
+        # Valida campos obrigatórios
+        if 'document' not in data:
+            return jsonify({'error': 'Campo "document" é obrigatório'}), 400
+
+        if 'replacements' not in data:
+            return jsonify({'error': 'Campo "replacements" é obrigatório'}), 400
+
+        document_base64 = data['document']
+        replacements = data['replacements']
+        filename = data.get('filename', 'documento.pdf')
+
+        # Garante que o filename termina com .pdf
+        if not filename.endswith('.pdf'):
+            filename += '.pdf'
+
+        # Valida que replacements é um dicionário
+        if not isinstance(replacements, dict):
+            return jsonify({'error': 'Campo "replacements" deve ser um objeto JSON'}), 400
+
+        logger.info(f"Processando documento com {len(replacements)} substituições para arquivo")
+
+        # Decodifica o documento
+        doc_bytes = decode_base64_file(document_base64)
+
+        # Substitui as tags no documento
+        modified_doc = replace_tags_in_doc(doc_bytes, replacements)
+
+        # Cria diretório temporário
+        temp_dir = tempfile.mkdtemp()
+        docx_path = os.path.join(temp_dir, 'document.docx')
+        pdf_path = os.path.join(temp_dir, 'document.pdf')
+
+        # Salva o documento modificado
+        modified_doc.save(docx_path)
+
+        # Converte para PDF
+        convert_docx_to_pdf(docx_path, pdf_path)
+
+        # Verifica se o PDF foi gerado
+        if not os.path.exists(pdf_path):
+            raise Exception("PDF não foi gerado")
+
+        logger.info(f"Documento convertido com sucesso: {filename}")
+
+        # Retorna o arquivo PDF
+        return send_file(
+            pdf_path,
+            mimetype='application/pdf',
+            as_attachment=True,
+            download_name=filename
+        )
+
+    except ValueError as e:
+        logger.error(f"Erro de validação: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logger.error(f"Erro interno: {str(e)}")
+        return jsonify({'error': f'Erro ao processar documento: {str(e)}'}), 500
+    finally:
+        # Limpa arquivos temporários após o envio
+        if temp_dir and os.path.exists(temp_dir):
+            try:
+                import shutil
+                shutil.rmtree(temp_dir)
+            except Exception as e:
+                logger.warning(f"Não foi possível remover diretório temporário: {str(e)}")
+
+
 @app.route('/', methods=['GET'])
 def index():
     """Endpoint raiz com informações da API"""
@@ -222,7 +311,8 @@ def index():
         'linkedin': '/maxwbh',
         'endpoints': {
             '/health': 'GET - Health check',
-            '/convert': 'POST - Convert DOC to PDF with tag replacement'
+            '/convert': 'POST - Convert DOC to PDF with tag replacement (returns Base64)',
+            '/convert-file': 'POST - Convert DOC to PDF with tag replacement (returns PDF file)'
         },
         'usage': {
             'method': 'POST',
