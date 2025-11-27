@@ -5,7 +5,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-3.0.0-green.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.2-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.0.3-brightgreen.svg)](CHANGELOG.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 **API REST profissional para conversão de documentos Word para PDF com substituição inteligente de tags**
@@ -117,6 +117,57 @@ Converte documento Word para PDF com substituição de tags e retorna o arquivo 
   "error": "Descrição do erro"
 }
 ```
+
+### `POST /process` ⭐ NOVO
+
+Endpoint flexível que suporta múltiplos formatos de entrada e saída.
+
+**Parâmetros:**
+- `input_type`: `base64` ou `doc` (padrão: `base64`)
+- `output_type`: `pdf`, `doc`, `base64_pdf`, `base64_doc` (padrão: `pdf`)
+- `document`: Documento em Base64
+- `replacements`: Tags e valores
+- `filename`: Nome do arquivo (opcional)
+
+**Exemplo 1 - Retorna PDF (arquivo):**
+```json
+{
+  "input_type": "base64",
+  "output_type": "pdf",
+  "document": "BASE64_ENCODED_DOC_FILE",
+  "replacements": {
+    "CLIENTE": "Empresa ABC",
+    "PROJETO": "Sistema de Gestão"
+  },
+  "filename": "proposta_comercial"
+}
+```
+
+**Exemplo 2 - Retorna DOC editado (Base64):**
+```json
+{
+  "input_type": "base64",
+  "output_type": "base64_doc",
+  "document": "BASE64_ENCODED_DOC_FILE",
+  "replacements": {
+    "TITULO": "Relatório Mensal",
+    "MES": "Novembro"
+  }
+}
+```
+
+**Response (Base64):**
+```json
+{
+  "success": true,
+  "output_type": "base64_doc",
+  "document": "BASE64_ENCODED_DOC",
+  "filename": "documento.docx",
+  "size_bytes": 12456
+}
+```
+
+📖 **Exemplos completos:** Ver [TEST_EXAMPLES.md](TEST_EXAMPLES.md) para todos os casos de uso
 
 ## Como Usar
 
@@ -268,6 +319,26 @@ pip install -e .
 # Com dependências de desenvolvimento
 pip install -e ".[dev]"
 ```
+
+### Instalação via Docker 🐳 (Recomendado)
+
+A forma mais rápida e fácil de executar a API!
+
+```bash
+# 1. Clone o repositório
+git clone https://github.com/Maxwbh/doc2pdf.git
+cd doc2pdf
+
+# 2. Inicie com Docker Compose
+docker-compose up -d
+
+# 3. Acesse a API
+curl http://localhost:5000/health
+```
+
+**Pronto!** A API está rodando em `http://localhost:5000`
+
+📖 **Guia completo:** Ver [DOCKER_GUIDE.md](DOCKER_GUIDE.md) para configurações avançadas
 
 ### Instalação Manual
 

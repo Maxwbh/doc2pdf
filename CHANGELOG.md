@@ -5,6 +5,30 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+
+## [1.0.3] - 2024-11-27
+
+### Adicionado
+- Novo endpoint `POST /process` flexível com suporte para múltiplos formatos
+  - Entrada: `base64` ou `doc`
+  - Saída: `pdf`, `doc`, `base64_pdf`, `base64_doc`
+- Arquivo `TEST_EXAMPLES.md` com exemplos completos de JSON para todos os endpoints
+- Arquivo `DOCKER_GUIDE.md` com guia completo de instalação via Docker
+- Arquivo `docker-compose.yml` para instalação simplificada
+- Arquivo `.env.example` para configuração de variáveis de ambiente
+- Exemplos de casos de uso completos (contratos, certificados, propostas)
+
+### Alterado
+- Endpoint raiz `/` agora inclui informações sobre o novo endpoint `/process`
+- Coleção do Postman atualizada com novo endpoint e exemplos de teste
+- README atualizado com instruções de instalação via Docker Compose
+
+### Melhorias
+- Documentação profissional mantida e expandida
+- Guias específicos para Docker e testes
+- Maior flexibilidade no processamento de documentos
+- Suporte para retorno de documentos Word editados
+
 ## [1.0.2] - 2024-11-27
 
 ### Adicionado

@@ -303,6 +303,165 @@ def convert_document_file():
                 logger.warning(f"Não foi possível remover diretório temporário: {str(e)}")
 
 
+@app.route('/process', methods=['POST'])
+def process_document():
+    """
+    Endpoint flexível para processamento de documentos
+
+    Suporta múltiplos formatos de entrada e saída
+
+    Args:
+        input_type: 'base64' ou 'doc' (padrão: 'base64')
+        document: Documento (Base64 ou bytes)
+        output_type: 'pdf', 'doc', 'base64_pdf', 'base64_doc' (padrão: 'pdf')
+        replacements: Dict com substituições de tags
+        filename: Nome do arquivo de saída (opcional)
+
+    Returns:
+        Documento no formato especificado
+    """
+    temp_dir = None
+    try:
+        # Valida requisição
+        if not request.is_json:
+            return jsonify({'error': 'Content-Type deve ser application/json'}), 400
+
+        data = request.get_json()
+
+        # Valida campos obrigatórios
+        if 'document' not in data:
+            return jsonify({'error': 'Campo "document" é obrigatório'}), 400
+
+        if 'replacements' not in data:
+            return jsonify({'error': 'Campo "replacements" é obrigatório'}), 400
+
+        # Parâmetros de processamento
+        input_type = data.get('input_type', 'base64').lower()
+        output_type = data.get('output_type', 'pdf').lower()
+        document_data = data['document']
+        replacements = data['replacements']
+        filename = data.get('filename', 'documento')
+
+        # Valida tipos
+        valid_input_types = ['base64', 'doc']
+        valid_output_types = ['pdf', 'doc', 'base64_pdf', 'base64_doc']
+
+        if input_type not in valid_input_types:
+            return jsonify({
+                'error': f'input_type inválido. Use: {", ".join(valid_input_types)}'
+            }), 400
+
+        if output_type not in valid_output_types:
+            return jsonify({
+                'error': f'output_type inválido. Use: {", ".join(valid_output_types)}'
+            }), 400
+
+        if not isinstance(replacements, dict):
+            return jsonify({'error': 'Campo "replacements" deve ser um objeto JSON'}), 400
+
+        logger.info(f"Processando: input={input_type}, output={output_type}, tags={len(replacements)}")
+
+        # Processa documento de entrada
+        if input_type == 'base64':
+            doc_bytes = decode_base64_file(document_data)
+        else:  # doc
+            doc_bytes = document_data.encode() if isinstance(document_data, str) else document_data
+
+        # Substitui tags no documento
+        modified_doc = replace_tags_in_doc(doc_bytes, replacements)
+
+        # Cria diretório temporário
+        temp_dir = tempfile.mkdtemp()
+        docx_path = os.path.join(temp_dir, 'document.docx')
+        modified_doc.save(docx_path)
+
+        # Processa saída baseado no tipo solicitado
+        if output_type == 'pdf':
+            # Retorna arquivo PDF
+            pdf_path = os.path.join(temp_dir, 'document.pdf')
+            convert_docx_to_pdf(docx_path, pdf_path)
+
+            if not os.path.exists(pdf_path):
+                raise Exception("PDF não foi gerado")
+
+            output_filename = filename if filename.endswith('.pdf') else f"{filename}.pdf"
+            logger.info(f"Retornando PDF: {output_filename}")
+
+            return send_file(
+                pdf_path,
+                mimetype='application/pdf',
+                as_attachment=True,
+                download_name=output_filename
+            )
+
+        elif output_type == 'doc':
+            # Retorna arquivo DOC
+            output_filename = filename if filename.endswith('.docx') else f"{filename}.docx"
+            logger.info(f"Retornando DOC: {output_filename}")
+
+            return send_file(
+                docx_path,
+                mimetype='application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                as_attachment=True,
+                download_name=output_filename
+            )
+
+        elif output_type == 'base64_pdf':
+            # Retorna PDF em Base64
+            pdf_path = os.path.join(temp_dir, 'document.pdf')
+            convert_docx_to_pdf(docx_path, pdf_path)
+
+            if not os.path.exists(pdf_path):
+                raise Exception("PDF não foi gerado")
+
+            with open(pdf_path, 'rb') as pdf_file:
+                pdf_bytes = pdf_file.read()
+                pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+
+            logger.info("Retornando PDF em Base64")
+
+            return jsonify({
+                'success': True,
+                'output_type': 'base64_pdf',
+                'document': pdf_base64,
+                'filename': f"{filename}.pdf",
+                'size_bytes': len(pdf_bytes),
+                'message': 'Documento processado com sucesso'
+            }), 200
+
+        elif output_type == 'base64_doc':
+            # Retorna DOC em Base64
+            with open(docx_path, 'rb') as doc_file:
+                doc_bytes_output = doc_file.read()
+                doc_base64 = base64.b64encode(doc_bytes_output).decode('utf-8')
+
+            logger.info("Retornando DOC em Base64")
+
+            return jsonify({
+                'success': True,
+                'output_type': 'base64_doc',
+                'document': doc_base64,
+                'filename': f"{filename}.docx",
+                'size_bytes': len(doc_bytes_output),
+                'message': 'Documento processado com sucesso'
+            }), 200
+
+    except ValueError as e:
+        logger.error(f"Erro de validação: {str(e)}")
+        return jsonify({'error': str(e)}), 400
+    except Exception as e:
+        logger.error(f"Erro interno: {str(e)}")
+        return jsonify({'error': f'Erro ao processar documento: {str(e)}'}), 500
+    finally:
+        # Limpa arquivos temporários
+        if temp_dir and os.path.exists(temp_dir):
+            try:
+                import shutil
+                shutil.rmtree(temp_dir)
+            except Exception as e:
+                logger.warning(f"Não foi possível remover diretório temporário: {str(e)}")
+
+
 @app.route('/', methods=['GET'])
 def index():
     """Endpoint raiz com informações da API"""
@@ -315,7 +474,8 @@ def index():
         'endpoints': {
             '/health': 'GET - Health check',
             '/convert': 'POST - Convert DOC to PDF with tag replacement (returns Base64)',
-            '/convert-file': 'POST - Convert DOC to PDF with tag replacement (returns PDF file)'
+            '/convert-file': 'POST - Convert DOC to PDF with tag replacement (returns PDF file)',
+            '/process': 'POST - Flexible document processing (supports multiple input/output formats)'
         },
         'usage': {
             'method': 'POST',
