@@ -17,6 +17,9 @@ import subprocess
 from werkzeug.exceptions import BadRequest
 import logging
 
+# Importa informações de versão
+from version import __version__, __author__, __email__, __company__, __linkedin__
+
 app = Flask(__name__)
 CORS(app)
 
@@ -130,7 +133,7 @@ def health_check():
     return jsonify({
         'status': 'healthy',
         'service': 'doc2pdf-api',
-        'version': '1.0.0'
+        'version': __version__
     }), 200
 
 
@@ -305,10 +308,10 @@ def index():
     """Endpoint raiz com informações da API"""
     return jsonify({
         'service': 'DOC to PDF Converter API',
-        'version': '1.0.0',
-        'author': 'Maxwell da Silva Oliveira - M&S do Brasil LTDA',
-        'email': 'maxwbh@gmail.com',
-        'linkedin': '/maxwbh',
+        'version': __version__,
+        'author': f'{__author__} - {__company__}',
+        'email': __email__,
+        'linkedin': __linkedin__,
         'endpoints': {
             '/health': 'GET - Health check',
             '/convert': 'POST - Convert DOC to PDF with tag replacement (returns Base64)',

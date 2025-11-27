@@ -1,17 +1,31 @@
-# DOC to PDF Converter API
+<div align="center">
 
-API Flask para conversão de documentos Word (.DOC) para PDF com substituição de tags.
+# 📄 DOC to PDF Converter API
 
-## Autor
+[![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
+[![Flask](https://img.shields.io/badge/flask-3.0.0-green.svg)](https://flask.palletsprojects.com/)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.2-brightgreen.svg)](CHANGELOG.md)
+[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
-**Maxwell da Silva Oliveira**
-M&S do Brasil LTDA
-📧 maxwbh@gmail.com
-💼 [LinkedIn: /maxwbh](https://linkedin.com/in/maxwbh)
+**API REST profissional para conversão de documentos Word para PDF com substituição inteligente de tags**
 
-## Descrição
+[Funcionalidades](#funcionalidades) •
+[Instalação](#instalação) •
+[Uso](#como-usar) •
+[API](#endpoints) •
+[Deploy](#deploy-no-render) •
+[Contribuir](CONTRIBUTING.md)
 
-Esta API recebe um arquivo Word em Base64, substitui tags personalizadas (ex: `%%NOME%%`, `%%ENDERECO%%`) pelos valores fornecidos e retorna um PDF em Base64.
+</div>
+
+---
+
+## 📖 Descrição
+
+API Flask moderna e robusta que permite converter documentos Word (.DOC/.DOCX) para PDF com substituição dinâmica de tags. Perfeita para geração automatizada de contratos, relatórios, certificados e outros documentos personalizados.
+
+**Desenvolvido por:** [Maxwell da Silva Oliveira](https://linkedin.com/in/maxwbh) - [M&S do Brasil LTDA](mailto:maxwbh@gmail.com)
 
 ## Funcionalidades
 
@@ -236,14 +250,34 @@ curl -X POST https://sua-api.render.com/convert-file \
   --output documento.pdf
 ```
 
-## Instalação Local
+---
 
-### Pré-requisitos
+## 📦 Instalação
 
-- Python 3.11+
+### Instalação via pip
+
+```bash
+# Instalação direta do repositório
+pip install git+https://github.com/Maxwbh/doc2pdf.git
+
+# Ou clone e instale localmente
+git clone https://github.com/Maxwbh/doc2pdf.git
+cd doc2pdf
+pip install -e .
+
+# Com dependências de desenvolvimento
+pip install -e ".[dev]"
+```
+
+### Instalação Manual
+
+#### Pré-requisitos
+
+- Python 3.9+ (recomendado: 3.11+)
 - LibreOffice (para conversão PDF)
+- pip e virtualenv
 
-### Passos
+#### Passos
 
 1. Clone o repositório:
 ```bash
@@ -367,16 +401,86 @@ doc2pdf/
 - Reduza o tamanho do documento
 - Simplifique imagens e formatação complexa
 
-## Suporte
+---
 
-Para questões ou suporte, entre em contato:
-- 📧 Email: maxwbh@gmail.com
-- 💼 LinkedIn: [/maxwbh](https://linkedin.com/in/maxwbh)
+## 🤝 Contribuindo
 
-## Licença
+Contribuições são bem-vindas! Por favor, leia o [Guia de Contribuição](CONTRIBUTING.md) para detalhes sobre:
 
-Este projeto foi desenvolvido por Maxwell da Silva Oliveira - M&S do Brasil LTDA.
+- Como reportar bugs
+- Como sugerir melhorias
+- Padrões de código
+- Processo de desenvolvimento
+- Sistema de versionamento
+
+### Passos Rápidos
+
+1. Fork o projeto
+2. Crie uma branch (`git checkout -b feature/nova-funcionalidade`)
+3. Commit suas mudanças (`git commit -m 'feat: adiciona nova funcionalidade'`)
+4. Push para a branch (`git push origin feature/nova-funcionalidade`)
+5. Abra um Pull Request
 
 ---
 
-**Desenvolvido com ❤️ por Maxwell da Silva Oliveira**
+## 📝 Versionamento
+
+Este projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/). Para o histórico de versões, veja o [CHANGELOG](CHANGELOG.md).
+
+### Incrementar Versão
+
+```bash
+# Patch (1.0.0 -> 1.0.1)
+python bump_version.py patch
+
+# Minor (1.0.0 -> 1.1.0)
+python bump_version.py minor
+
+# Major (1.0.0 -> 2.0.0)
+python bump_version.py major
+```
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+```
+Copyright (c) 2024 Maxwell da Silva Oliveira - M&S do Brasil LTDA
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction...
+```
+
+---
+
+## 📞 Suporte e Contato
+
+### Suporte Técnico
+
+- 📧 **Email:** [maxwbh@gmail.com](mailto:maxwbh@gmail.com)
+- 💼 **LinkedIn:** [/maxwbh](https://linkedin.com/in/maxwbh)
+- 🐛 **Issues:** [GitHub Issues](https://github.com/Maxwbh/doc2pdf/issues)
+- 📖 **Documentação:** [POSTMAN_GUIDE.md](POSTMAN_GUIDE.md)
+
+### Links Úteis
+
+- [Changelog](CHANGELOG.md) - Histórico de versões
+- [Contributing](CONTRIBUTING.md) - Guia de contribuição
+- [Postman Collection](DOC2PDF_API.postman_collection.json) - Testes da API
+- [Examples](example_usage.py) - Exemplos de uso
+
+---
+
+<div align="center">
+
+**Desenvolvido com ❤️ por [Maxwell da Silva Oliveira](https://linkedin.com/in/maxwbh)**
+
+**M&S do Brasil LTDA** | 2024
+
+[![GitHub](https://img.shields.io/badge/GitHub-Maxwbh-181717?logo=github)](https://github.com/Maxwbh)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-maxwbh-0A66C2?logo=linkedin)](https://linkedin.com/in/maxwbh)
+
+</div>
