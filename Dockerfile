@@ -1,6 +1,6 @@
 # Dockerfile otimizado para API DOC to PDF
 # Autor: Maxwell da Silva Oliveira - M&S do Brasil LTDA
-# Versão: 1.4.0 - LibreOffice com opções avançadas de qualidade PDF
+# Versão: 1.5.0 - Código modularizado e profissional
 
 # ============================================
 # Stage 1: Builder - Prepara dependências
@@ -50,8 +50,10 @@ COPY --from=builder /root/.local /root/.local
 # Adiciona .local/bin ao PATH
 ENV PATH=/root/.local/bin:$PATH
 
-# Copia APENAS arquivos necessários (ordem otimizada para cache)
+# Copia estrutura modular da aplicação (ordem otimizada para cache)
 COPY version.py .
+COPY config/ ./config/
+COPY app/ ./app/
 COPY app.py .
 
 # Expõe porta (Render usa PORT environment variable)

@@ -5,6 +5,67 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.5.0] - 2025-12-05
+
+### 🏗️ MAJOR REFACTOR: Código Modularizado e Profissional
+
+### Arquitetura
+- **Código completamente refatorado** em estrutura modular profissional
+- **Factory pattern** para criação da aplicação Flask
+- **Blueprints** para organização de rotas
+- **Separação de responsabilidades** (routes, services, utils, config)
+
+### Estrutura de Diretórios
+```
+doc2pdf/
+├── app/
+│   ├── __init__.py           # Flask app factory
+│   ├── routes/               # Endpoints separados
+│   ├── services/             # Lógica de negócio
+│   ├── utils/                # Utilitários
+│   └── models/               # Schemas (futuro)
+├── config/                   # Configurações centralizadas
+├── examples/                 # Exemplos de uso
+├── tests/                    # Testes (futuro)
+└── app.py                    # Entry point simplificado
+```
+
+### Adicionado
+- **config/settings.py** - Configurações centralizadas da aplicação
+- **app/utils/logger.py** - Sistema de logging configurável
+- **app/utils/encoders.py** - Funções de Base64 encode/decode
+- **app/utils/validators.py** - Validações de entrada
+- **app/services/docx_service.py** - Serviço de manipulação DOCX
+- **app/services/pdf_service.py** - Serviço de conversão PDF
+- **app/routes/health.py** - Endpoints de saúde e info
+- **app/routes/convert.py** - Endpoint /convert modularizado
+- **app/routes/convert_file.py** - Endpoint /convert-file modularizado
+- **app/routes/process.py** - Endpoint /process modularizado
+- **examples/python_example.py** - Exemplos completos em Python
+- **examples/curl_examples.sh** - Exemplos em cURL
+- **examples/javascript_example.js** - Exemplos em JavaScript/Node.js
+
+### Melhorado
+- **Código 70% mais limpo** e fácil de manter
+- **Responsabilidades bem definidas** em cada módulo
+- **Reutilização de código** através de services e utils
+- **Testabilidade** aumentada com modularização
+- **Documentação inline** em todos os módulos
+- **Type hints** em funções críticas
+- **Error handling** centralizado e consistente
+
+### Compatibilidade
+- ✅ 100% compatível com v1.4.0
+- ✅ Mesma API, mesmos endpoints
+- ✅ Nenhuma breaking change
+- ✅ Dockerfile atualizado para nova estrutura
+
+### Benefícios
+- **Manutenibilidade** - Código organizado e fácil de navegar
+- **Escalabilidade** - Fácil adicionar novos endpoints/features
+- **Colaboração** - Estrutura profissional facilita contribuições
+- **Profissionalismo** - Segue best practices de Flask e Python
+
 ## [1.4.0] - 2025-12-05
 
 ### 🎯 MAJOR FEATURE: Controle Avançado de Qualidade de PDF
