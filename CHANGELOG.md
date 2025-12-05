@@ -11,6 +11,33 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
+
+## [1.3.0] - 2025-12-05
+
+### BREAKING CHANGE
+- **Formato de tags alterado de `%%TAG%%` para `{TAG}`**
+- Esta é uma mudança incompatível com versões anteriores
+- Documentos devem usar o novo formato `{TAG}` em vez de `%%TAG%%`
+
+### Adicionado
+- **Substituição de tags em cabeçalhos (headers)** - Tags agora são substituídas no cabeçalho do documento
+- **Substituição de tags em rodapés (footers)** - Tags agora são substituídas no rodapé do documento
+- **Substituição em tabelas de header/footer** - Suporta tags dentro de tabelas em cabeçalhos e rodapés
+- **Contador de tags substituídas** - Log mostra quantas tags foram substituídas no total
+- **Logs detalhados por seção** - Indica quando tags são substituídas em headers/footers
+
+### Alterado
+- Formato de tags: `%%TAG%%` → `{TAG}` (usando colchetes)
+- Função `replace_tags_in_doc()` completamente refatorada
+- Logging mais detalhado durante substituição de tags
+- Suporte completo para múltiplas seções do documento
+
+### Melhorias
+- Substituição de tags em 4 áreas: parágrafos, tabelas, headers e footers
+- Preservação de formatação em todas as áreas do documento
+- Logs indicam exatamente onde cada tag foi substituída
+- Função auxiliar `replace_in_runs()` para código mais limpo e reutilizável
+
 ## [1.2.1] - 2025-12-05
 
 ### Adicionado

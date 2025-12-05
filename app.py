@@ -127,6 +127,9 @@ def replace_tags_in_doc(doc_bytes, replacements):
     """
     Substitui tags no documento Word pelos valores fornecidos
 
+    Tags no formato: {TAG}
+    Substitui em: parágrafos, tabelas, cabeçalhos e rodapés
+
     Args:
         doc_bytes: Bytes do documento Word
         replacements: Dicionário com as substituições {tag: valor}
@@ -144,30 +147,78 @@ def replace_tags_in_doc(doc_bytes, replacements):
         # Abre o documento a partir dos bytes
         doc = Document(io.BytesIO(doc_bytes))
 
-        # Substitui tags nos parágrafos
+        tags_replaced_count = 0
+
+        # Função auxiliar para substituir tags em runs
+        def replace_in_runs(runs, tag, value):
+            replaced = False
+            tag_formatted = f"{{{tag.upper()}}}"
+            for run in runs:
+                if tag_formatted in run.text:
+                    run.text = run.text.replace(tag_formatted, str(value))
+                    replaced = True
+            return replaced
+
+        # 1. Substitui tags nos parágrafos principais
+        logger.info("Substituindo tags nos parágrafos...")
         for paragraph in doc.paragraphs:
             for tag, value in replacements.items():
-                # Formata a tag com %%
-                tag_formatted = f"%%{tag.upper()}%%"
-                if tag_formatted in paragraph.text:
-                    # Substitui em cada run para preservar formatação
-                    for run in paragraph.runs:
-                        if tag_formatted in run.text:
-                            run.text = run.text.replace(tag_formatted, str(value))
+                if replace_in_runs(paragraph.runs, tag, value):
+                    tags_replaced_count += 1
 
-        # Substitui tags nas tabelas
+        # 2. Substitui tags nas tabelas
+        logger.info("Substituindo tags nas tabelas...")
         for table in doc.tables:
             for row in table.rows:
                 for cell in row.cells:
-                    for tag, value in replacements.items():
-                        tag_formatted = f"%%{tag.upper()}%%"
-                        if tag_formatted in cell.text:
-                            for paragraph in cell.paragraphs:
-                                for run in paragraph.runs:
-                                    if tag_formatted in run.text:
-                                        run.text = run.text.replace(tag_formatted, str(value))
+                    for paragraph in cell.paragraphs:
+                        for tag, value in replacements.items():
+                            if replace_in_runs(paragraph.runs, tag, value):
+                                tags_replaced_count += 1
 
+        # 3. Substitui tags nos cabeçalhos (headers)
+        logger.info("Substituindo tags nos cabeçalhos...")
+        for section in doc.sections:
+            # Header principal
+            if section.header:
+                for paragraph in section.header.paragraphs:
+                    for tag, value in replacements.items():
+                        if replace_in_runs(paragraph.runs, tag, value):
+                            tags_replaced_count += 1
+                            logger.info(f"  ✓ Tag {{{tag.upper()}}} substituída no cabeçalho")
+
+                # Tabelas no header
+                for table in section.header.tables:
+                    for row in table.rows:
+                        for cell in row.cells:
+                            for paragraph in cell.paragraphs:
+                                for tag, value in replacements.items():
+                                    if replace_in_runs(paragraph.runs, tag, value):
+                                        tags_replaced_count += 1
+
+        # 4. Substitui tags nos rodapés (footers)
+        logger.info("Substituindo tags nos rodapés...")
+        for section in doc.sections:
+            # Footer principal
+            if section.footer:
+                for paragraph in section.footer.paragraphs:
+                    for tag, value in replacements.items():
+                        if replace_in_runs(paragraph.runs, tag, value):
+                            tags_replaced_count += 1
+                            logger.info(f"  ✓ Tag {{{tag.upper()}}} substituída no rodapé")
+
+                # Tabelas no footer
+                for table in section.footer.tables:
+                    for row in table.rows:
+                        for cell in row.cells:
+                            for paragraph in cell.paragraphs:
+                                for tag, value in replacements.items():
+                                    if replace_in_runs(paragraph.runs, tag, value):
+                                        tags_replaced_count += 1
+
+        logger.info(f"Total de tags substituídas: {tags_replaced_count}")
         return doc
+
     except Exception as e:
         logger.error(f"Erro ao processar documento: {str(e)}")
         raise ValueError(f"Erro ao processar documento Word: {str(e)}")
