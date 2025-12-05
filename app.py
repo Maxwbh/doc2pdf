@@ -16,6 +16,8 @@ from docx import Document
 import subprocess
 from werkzeug.exceptions import BadRequest
 import logging
+import time
+from datetime import datetime
 
 # Importa informações de versão
 from version import __version__, __author__, __email__, __company__, __linkedin__
@@ -23,9 +25,48 @@ from version import __version__, __author__, __email__, __company__, __linkedin_
 app = Flask(__name__)
 CORS(app)
 
-# Configuração de logging
-logging.basicConfig(level=logging.INFO)
+# Configuração avançada de logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - [%(funcName)s] - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 logger = logging.getLogger(__name__)
+
+# Log de inicialização
+logger.info(f"="*60)
+logger.info(f"Iniciando DOC2PDF API v{__version__}")
+logger.info(f"Desenvolvido por: {__author__} - {__company__}")
+logger.info(f"="*60)
+
+
+# Middleware para logging de requisições
+@app.before_request
+def log_request():
+    """Log detalhado de cada requisição"""
+    request.start_time = time.time()
+    logger.info(f">>> NOVA REQUISIÇÃO")
+    logger.info(f"Método: {request.method}")
+    logger.info(f"Endpoint: {request.path}")
+    logger.info(f"IP Cliente: {request.remote_addr}")
+    logger.info(f"User-Agent: {request.headers.get('User-Agent', 'N/A')[:100]}")
+
+    if request.method in ['POST', 'PUT', 'PATCH']:
+        content_length = request.headers.get('Content-Length', 0)
+        logger.info(f"Tamanho do payload: {content_length} bytes")
+
+
+@app.after_request
+def log_response(response):
+    """Log da resposta e tempo de processamento"""
+    if hasattr(request, 'start_time'):
+        duration = time.time() - request.start_time
+        logger.info(f"<<< RESPOSTA ENVIADA")
+        logger.info(f"Status: {response.status_code}")
+        logger.info(f"Tempo de processamento: {duration:.3f}s")
+        logger.info(f"Tamanho da resposta: {response.content_length or 0} bytes")
+        logger.info(f"-"*60)
+    return response
 
 
 # Headers de segurança
@@ -179,37 +220,63 @@ def convert_document():
 
         # Valida que replacements é um dicionário
         if not isinstance(replacements, dict):
+            logger.warning("Requisição rejeitada: replacements inválido")
             return jsonify({'error': 'Campo "replacements" deve ser um objeto JSON'}), 400
 
-        logger.info(f"Processando documento com {len(replacements)} substituições")
+        logger.info(f"✓ Validação OK - {len(replacements)} substituições encontradas")
+        logger.info(f"Tags a substituir: {list(replacements.keys())}")
 
         # Decodifica o documento
+        logger.info("Etapa 1/4: Decodificando documento Base64...")
+        start_decode = time.time()
         doc_bytes = decode_base64_file(document_base64)
+        logger.info(f"✓ Documento decodificado ({len(doc_bytes)} bytes) em {time.time() - start_decode:.3f}s")
 
         # Substitui as tags no documento
+        logger.info("Etapa 2/4: Substituindo tags no documento...")
+        start_replace = time.time()
         modified_doc = replace_tags_in_doc(doc_bytes, replacements)
+        logger.info(f"✓ Tags substituídas em {time.time() - start_replace:.3f}s")
 
         # Cria arquivos temporários
         with tempfile.TemporaryDirectory() as temp_dir:
+            logger.info(f"Diretório temporário: {temp_dir}")
             docx_path = os.path.join(temp_dir, 'document.docx')
             pdf_path = os.path.join(temp_dir, 'document.pdf')
 
             # Salva o documento modificado
+            logger.info("Etapa 3/4: Salvando documento DOCX...")
+            start_save = time.time()
             modified_doc.save(docx_path)
+            doc_size = os.path.getsize(docx_path)
+            logger.info(f"✓ DOCX salvo ({doc_size} bytes) em {time.time() - start_save:.3f}s")
 
             # Converte para PDF
+            logger.info("Etapa 4/4: Convertendo DOCX para PDF...")
+            start_convert = time.time()
             convert_docx_to_pdf(docx_path, pdf_path)
 
             # Verifica se o PDF foi gerado
             if not os.path.exists(pdf_path):
+                logger.error("ERRO: PDF não foi gerado pelo LibreOffice")
                 raise Exception("PDF não foi gerado")
 
+            pdf_size = os.path.getsize(pdf_path)
+            logger.info(f"✓ PDF gerado ({pdf_size} bytes) em {time.time() - start_convert:.3f}s")
+
             # Lê o PDF e converte para Base64
+            logger.info("Codificando PDF para Base64...")
+            start_encode = time.time()
             with open(pdf_path, 'rb') as pdf_file:
                 pdf_bytes = pdf_file.read()
                 pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+            logger.info(f"✓ PDF codificado em Base64 ({len(pdf_base64)} chars) em {time.time() - start_encode:.3f}s")
 
-        logger.info("Documento convertido com sucesso")
+        # Calcula tempo total
+        total_time = time.time() - request.start_time if hasattr(request, 'start_time') else 0
+        logger.info(f"✅ CONVERSÃO CONCLUÍDA COM SUCESSO")
+        logger.info(f"Resumo: DOCX ({doc_size}b) -> PDF ({pdf_size}b) -> Base64 ({len(pdf_base64)} chars)")
+        logger.info(f"Tempo total de conversão: {total_time:.3f}s")
 
         return jsonify({
             'success': True,
@@ -263,32 +330,57 @@ def convert_document_file():
 
         # Valida que replacements é um dicionário
         if not isinstance(replacements, dict):
+            logger.warning("Requisição rejeitada: replacements inválido")
             return jsonify({'error': 'Campo "replacements" deve ser um objeto JSON'}), 400
 
-        logger.info(f"Processando documento com {len(replacements)} substituições para arquivo")
+        logger.info(f"✓ Validação OK - {len(replacements)} substituições encontradas")
+        logger.info(f"Tags a substituir: {list(replacements.keys())}")
+        logger.info(f"Nome do arquivo de saída: {filename}")
 
         # Decodifica o documento
+        logger.info("Etapa 1/4: Decodificando documento Base64...")
+        start_decode = time.time()
         doc_bytes = decode_base64_file(document_base64)
+        logger.info(f"✓ Documento decodificado ({len(doc_bytes)} bytes) em {time.time() - start_decode:.3f}s")
 
         # Substitui as tags no documento
+        logger.info("Etapa 2/4: Substituindo tags no documento...")
+        start_replace = time.time()
         modified_doc = replace_tags_in_doc(doc_bytes, replacements)
+        logger.info(f"✓ Tags substituídas em {time.time() - start_replace:.3f}s")
 
         # Cria diretório temporário
         temp_dir = tempfile.mkdtemp()
+        logger.info(f"Diretório temporário: {temp_dir}")
         docx_path = os.path.join(temp_dir, 'document.docx')
         pdf_path = os.path.join(temp_dir, 'document.pdf')
 
         # Salva o documento modificado
+        logger.info("Etapa 3/4: Salvando documento DOCX...")
+        start_save = time.time()
         modified_doc.save(docx_path)
+        doc_size = os.path.getsize(docx_path)
+        logger.info(f"✓ DOCX salvo ({doc_size} bytes) em {time.time() - start_save:.3f}s")
 
         # Converte para PDF
+        logger.info("Etapa 4/4: Convertendo DOCX para PDF...")
+        start_convert = time.time()
         convert_docx_to_pdf(docx_path, pdf_path)
 
         # Verifica se o PDF foi gerado
         if not os.path.exists(pdf_path):
+            logger.error("ERRO: PDF não foi gerado pelo LibreOffice")
             raise Exception("PDF não foi gerado")
 
-        logger.info(f"Documento convertido com sucesso: {filename}")
+        pdf_size = os.path.getsize(pdf_path)
+        logger.info(f"✓ PDF gerado ({pdf_size} bytes) em {time.time() - start_convert:.3f}s")
+
+        # Calcula tempo total
+        total_time = time.time() - request.start_time if hasattr(request, 'start_time') else 0
+        logger.info(f"✅ CONVERSÃO CONCLUÍDA COM SUCESSO")
+        logger.info(f"Resumo: DOCX ({doc_size}b) -> PDF ({pdf_size}b)")
+        logger.info(f"Tempo total de conversão: {total_time:.3f}s")
+        logger.info(f"Retornando arquivo: {filename}")
 
         # Retorna o arquivo PDF
         return send_file(
@@ -368,35 +460,62 @@ def process_document():
             }), 400
 
         if not isinstance(replacements, dict):
+            logger.warning("Requisição rejeitada: replacements inválido")
             return jsonify({'error': 'Campo "replacements" deve ser um objeto JSON'}), 400
 
-        logger.info(f"Processando: input={input_type}, output={output_type}, tags={len(replacements)}")
+        logger.info(f"✓ Validação OK")
+        logger.info(f"Configuração: input_type={input_type}, output_type={output_type}")
+        logger.info(f"Substituições: {len(replacements)} tags - {list(replacements.keys())}")
+        logger.info(f"Nome do arquivo: {filename}")
 
         # Processa documento de entrada
+        logger.info(f"Etapa 1/4: Processando entrada ({input_type})...")
+        start_input = time.time()
         if input_type == 'base64':
             doc_bytes = decode_base64_file(document_data)
+            logger.info(f"✓ Base64 decodificado ({len(doc_bytes)} bytes) em {time.time() - start_input:.3f}s")
         else:  # doc
             doc_bytes = document_data.encode() if isinstance(document_data, str) else document_data
+            logger.info(f"✓ Documento processado ({len(doc_bytes)} bytes) em {time.time() - start_input:.3f}s")
 
         # Substitui tags no documento
+        logger.info("Etapa 2/4: Substituindo tags no documento...")
+        start_replace = time.time()
         modified_doc = replace_tags_in_doc(doc_bytes, replacements)
+        logger.info(f"✓ Tags substituídas em {time.time() - start_replace:.3f}s")
 
         # Cria diretório temporário
         temp_dir = tempfile.mkdtemp()
+        logger.info(f"Diretório temporário: {temp_dir}")
         docx_path = os.path.join(temp_dir, 'document.docx')
+
+        logger.info("Etapa 3/4: Salvando documento DOCX...")
+        start_save = time.time()
         modified_doc.save(docx_path)
+        doc_size = os.path.getsize(docx_path)
+        logger.info(f"✓ DOCX salvo ({doc_size} bytes) em {time.time() - start_save:.3f}s")
 
         # Processa saída baseado no tipo solicitado
         if output_type == 'pdf':
             # Retorna arquivo PDF
+            logger.info("Etapa 4/4: Convertendo para PDF e retornando arquivo...")
+            start_output = time.time()
             pdf_path = os.path.join(temp_dir, 'document.pdf')
             convert_docx_to_pdf(docx_path, pdf_path)
 
             if not os.path.exists(pdf_path):
+                logger.error("ERRO: PDF não foi gerado pelo LibreOffice")
                 raise Exception("PDF não foi gerado")
 
+            pdf_size = os.path.getsize(pdf_path)
             output_filename = filename if filename.endswith('.pdf') else f"{filename}.pdf"
-            logger.info(f"Retornando PDF: {output_filename}")
+            logger.info(f"✓ PDF gerado ({pdf_size} bytes) em {time.time() - start_output:.3f}s")
+
+            total_time = time.time() - request.start_time if hasattr(request, 'start_time') else 0
+            logger.info(f"✅ PROCESSAMENTO CONCLUÍDO COM SUCESSO")
+            logger.info(f"Resumo: DOCX ({doc_size}b) -> PDF ({pdf_size}b)")
+            logger.info(f"Tempo total: {total_time:.3f}s")
+            logger.info(f"Retornando arquivo: {output_filename}")
 
             return send_file(
                 pdf_path,
@@ -407,8 +526,16 @@ def process_document():
 
         elif output_type == 'doc':
             # Retorna arquivo DOC
+            logger.info("Etapa 4/4: Preparando arquivo DOCX para retorno...")
+            start_output = time.time()
             output_filename = filename if filename.endswith('.docx') else f"{filename}.docx"
-            logger.info(f"Retornando DOC: {output_filename}")
+            logger.info(f"✓ Arquivo DOCX pronto ({doc_size} bytes) em {time.time() - start_output:.3f}s")
+
+            total_time = time.time() - request.start_time if hasattr(request, 'start_time') else 0
+            logger.info(f"✅ PROCESSAMENTO CONCLUÍDO COM SUCESSO")
+            logger.info(f"Resumo: DOCX ({doc_size}b)")
+            logger.info(f"Tempo total: {total_time:.3f}s")
+            logger.info(f"Retornando arquivo: {output_filename}")
 
             return send_file(
                 docx_path,
@@ -419,17 +546,32 @@ def process_document():
 
         elif output_type == 'base64_pdf':
             # Retorna PDF em Base64
+            logger.info("Etapa 4/4: Convertendo para PDF e codificando em Base64...")
+            start_output = time.time()
             pdf_path = os.path.join(temp_dir, 'document.pdf')
+
+            logger.info("Sub-etapa 4a: Convertendo DOCX para PDF...")
+            start_convert = time.time()
             convert_docx_to_pdf(docx_path, pdf_path)
 
             if not os.path.exists(pdf_path):
+                logger.error("ERRO: PDF não foi gerado pelo LibreOffice")
                 raise Exception("PDF não foi gerado")
 
+            pdf_size = os.path.getsize(pdf_path)
+            logger.info(f"✓ PDF gerado ({pdf_size} bytes) em {time.time() - start_convert:.3f}s")
+
+            logger.info("Sub-etapa 4b: Codificando PDF para Base64...")
+            start_encode = time.time()
             with open(pdf_path, 'rb') as pdf_file:
                 pdf_bytes = pdf_file.read()
                 pdf_base64 = base64.b64encode(pdf_bytes).decode('utf-8')
+            logger.info(f"✓ PDF codificado em Base64 ({len(pdf_base64)} chars) em {time.time() - start_encode:.3f}s")
 
-            logger.info("Retornando PDF em Base64")
+            total_time = time.time() - request.start_time if hasattr(request, 'start_time') else 0
+            logger.info(f"✅ PROCESSAMENTO CONCLUÍDO COM SUCESSO")
+            logger.info(f"Resumo: DOCX ({doc_size}b) -> PDF ({pdf_size}b) -> Base64 ({len(pdf_base64)} chars)")
+            logger.info(f"Tempo total: {total_time:.3f}s")
 
             return jsonify({
                 'success': True,
@@ -442,11 +584,17 @@ def process_document():
 
         elif output_type == 'base64_doc':
             # Retorna DOC em Base64
+            logger.info("Etapa 4/4: Codificando DOCX para Base64...")
+            start_output = time.time()
             with open(docx_path, 'rb') as doc_file:
                 doc_bytes_output = doc_file.read()
                 doc_base64 = base64.b64encode(doc_bytes_output).decode('utf-8')
+            logger.info(f"✓ DOCX codificado em Base64 ({len(doc_base64)} chars) em {time.time() - start_output:.3f}s")
 
-            logger.info("Retornando DOC em Base64")
+            total_time = time.time() - request.start_time if hasattr(request, 'start_time') else 0
+            logger.info(f"✅ PROCESSAMENTO CONCLUÍDO COM SUCESSO")
+            logger.info(f"Resumo: DOCX ({doc_size}b) -> Base64 ({len(doc_base64)} chars)")
+            logger.info(f"Tempo total: {total_time:.3f}s")
 
             return jsonify({
                 'success': True,

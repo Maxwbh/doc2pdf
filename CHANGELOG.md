@@ -6,6 +6,37 @@ O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
 
+
+## [1.1.0] - 2025-12-05
+
+### Adicionado
+- Sistema completo de logging estruturado para monitoramento em produção (Render)
+- Middleware de logging de requisições com detalhes de IP, método, endpoint e User-Agent
+- Middleware de logging de respostas com status, tempo de processamento e tamanho
+- Logs detalhados de inicialização da API com versão e informações do autor
+- Logging step-by-step (Etapas 1/4 a 4/4) em todos os endpoints de conversão
+- Métricas de tempo individual para cada operação (decodificação, substituição, salvamento, conversão)
+- Logs de resumo com tamanhos de arquivos e tempo total de conversão
+- Indicadores visuais de progresso (✓, ✅, >>>. <<<, ---) nos logs
+- Logs de erro detalhados com contexto específico
+- Rastreamento completo do ciclo de vida de cada requisição
+
+### Alterado
+- Endpoint `/convert` com logging detalhado de todas as 4 etapas do processo
+- Endpoint `/convert-file` com logging detalhado de todas as 4 etapas do processo
+- Endpoint `/process` com logging específico para cada tipo de saída (pdf, doc, base64_pdf, base64_doc)
+- Função `decode_base64_file` com logging de erros
+- Função `replace_tags_in_doc` com logging de erros de processamento
+- Função `convert_docx_to_pdf` com logging de erros do LibreOffice
+- Formato de logs inclui timestamp, nível, nome da função e mensagem
+
+### Melhorias
+- Logs estruturados facilitam debug em produção no Render
+- Métricas de performance para identificar gargalos
+- Rastreabilidade completa de cada conversão
+- Melhor visibilidade de erros e exceções
+- Logs no formato human-readable para fácil análise
+
 ## [1.0.3] - 2024-11-27
 
 ### Adicionado
