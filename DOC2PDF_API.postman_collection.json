@@ -1,0 +1,348 @@
+{
+	"info": {
+		"_postman_id": "doc2pdf-api-collection",
+		"name": "DOC to PDF Converter API",
+		"description": "Coleção completa de endpoints da API DOC to PDF\n\nAutor: Maxwell da Silva Oliveira - M&S do Brasil LTDA\nEmail: maxwbh@gmail.com\nLinkedIn: /maxwbh",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/health",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Verifica o status da API"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"status\": \"healthy\",\n    \"service\": \"doc2pdf-api\",\n    \"version\": \"1.0.0\"\n}"
+				}
+			]
+		},
+		{
+			"name": "API Info",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						""
+					]
+				},
+				"description": "Retorna informações sobre a API e exemplos de uso"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"service\": \"DOC to PDF Converter API\",\n    \"version\": \"1.0.0\",\n    \"author\": \"Maxwell da Silva Oliveira - M&S do Brasil LTDA\",\n    \"email\": \"maxwbh@gmail.com\",\n    \"linkedin\": \"/maxwbh\",\n    \"endpoints\": {\n        \"/health\": \"GET - Health check\",\n        \"/convert\": \"POST - Convert DOC to PDF with tag replacement (returns Base64)\",\n        \"/convert-file\": \"POST - Convert DOC to PDF with tag replacement (returns PDF file)\"\n    }\n}"
+				}
+			]
+		},
+		{
+			"name": "Convert DOC to PDF (Base64)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"document\": \"{{document_base64}}\",\n    \"replacements\": {\n        \"NOME\": \"Jose da Silva\",\n        \"ENDERECO\": \"Rua qualquer coisa, Nro1, Bairro das colinas, São Paulo/SP - CEP: 48.4839-877\",\n        \"DATANASCIMENTO\": \"01/01/1990\",\n        \"CPF\": \"123.456.789-00\",\n        \"TELEFONE\": \"(11) 98765-4321\",\n        \"EMAIL\": \"jose.silva@email.com\"\n    }\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/convert",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"convert"
+					]
+				},
+				"description": "Converte documento Word para PDF com substituição de tags e retorna o PDF em Base64.\n\n**Como usar:**\n1. Substitua `{{document_base64}}` pelo seu documento codificado em Base64\n2. Ajuste os valores em `replacements` conforme necessário\n3. O PDF será retornado em Base64 no campo `pdf` da resposta\n\n**Para gerar Base64 do documento:**\n```python\nimport base64\nwith open('documento.docx', 'rb') as f:\n    doc_base64 = base64.b64encode(f.read()).decode('utf-8')\n    print(doc_base64)\n```"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": \"BASE64_STRING_AQUI\",\n    \"replacements\": {\n        \"NOME\": \"Jose da Silva\",\n        \"ENDERECO\": \"Rua qualquer coisa, Nro1\",\n        \"DATANASCIMENTO\": \"01/01/1990\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"success\": true,\n    \"pdf\": \"JVBERi0xLjQKJeLjz9MKMyAwIG9iago8P...\",\n    \"message\": \"Documento convertido com sucesso\"\n}"
+				},
+				{
+					"name": "Error - Missing document",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"replacements\": {\n        \"NOME\": \"Jose da Silva\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"error\": \"Campo \\\"document\\\" é obrigatório\"\n}"
+				}
+			]
+		},
+		{
+			"name": "Convert DOC to PDF (File)",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"document\": \"{{document_base64}}\",\n    \"replacements\": {\n        \"NOME\": \"Jose da Silva\",\n        \"ENDERECO\": \"Rua qualquer coisa, Nro1, Bairro das colinas, São Paulo/SP - CEP: 48.4839-877\",\n        \"DATANASCIMENTO\": \"01/01/1990\",\n        \"CPF\": \"123.456.789-00\",\n        \"TELEFONE\": \"(11) 98765-4321\",\n        \"EMAIL\": \"jose.silva@email.com\"\n    },\n    \"filename\": \"contrato_jose_silva.pdf\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/convert-file",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"convert-file"
+					]
+				},
+				"description": "Converte documento Word para PDF com substituição de tags e retorna o arquivo PDF diretamente.\n\n**Como usar:**\n1. Substitua `{{document_base64}}` pelo seu documento codificado em Base64\n2. Ajuste os valores em `replacements` conforme necessário\n3. O campo `filename` é opcional (padrão: documento.pdf)\n4. O PDF será retornado diretamente como arquivo\n5. No Postman, clique em \"Send and Download\" para salvar o PDF\n\n**Vantagens:**\n- Retorna arquivo PDF diretamente\n- Pode ser visualizado no navegador\n- Mais eficiente que Base64 para arquivos grandes\n- Não precisa decodificar Base64"
+			},
+			"response": [
+				{
+					"name": "Success",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": \"BASE64_STRING_AQUI\",\n    \"replacements\": {\n        \"NOME\": \"Jose da Silva\",\n        \"ENDERECO\": \"Rua qualquer coisa, Nro1\",\n        \"DATANASCIMENTO\": \"01/01/1990\"\n    },\n    \"filename\": \"contrato.pdf\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/convert-file",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert-file"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "plain",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/pdf"
+						},
+						{
+							"key": "Content-Disposition",
+							"value": "attachment; filename=contrato.pdf"
+						}
+					],
+					"body": "[Binary PDF data]"
+				},
+				{
+					"name": "Error - Invalid Base64",
+					"originalRequest": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": \"INVALID_BASE64\",\n    \"replacements\": {\n        \"NOME\": \"Jose da Silva\"\n    }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/convert-file",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert-file"
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json"
+						}
+					],
+					"body": "{\n    \"error\": \"String Base64 inválida\"\n}"
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "document_base64",
+			"value": "COLE_SEU_DOCUMENTO_BASE64_AQUI",
+			"type": "string"
+		}
+	]
+}

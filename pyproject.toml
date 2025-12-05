@@ -1,0 +1,81 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools_scm[toml]>=6.2"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "doc2pdf-api"
+dynamic = ["version"]
+description = "API Flask para conversão de documentos Word para PDF com substituição de tags"
+readme = "README.md"
+requires-python = ">=3.9"
+license = {text = "MIT"}
+authors = [
+    {name = "Maxwell da Silva Oliveira", email = "maxwbh@gmail.com"}
+]
+maintainers = [
+    {name = "Maxwell da Silva Oliveira", email = "maxwbh@gmail.com"}
+]
+keywords = ["pdf", "word", "docx", "conversion", "flask", "api", "document-processing"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Framework :: Flask",
+    "Topic :: Office/Business",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    "Flask>=3.0.0",
+    "flask-cors>=4.0.0",
+    "python-docx>=1.1.0",
+    "gunicorn>=21.2.0",
+    "Werkzeug>=3.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "black>=23.0.0",
+    "flake8>=6.0.0",
+    "mypy>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/Maxwbh/doc2pdf"
+Documentation = "https://github.com/Maxwbh/doc2pdf#readme"
+Repository = "https://github.com/Maxwbh/doc2pdf"
+"Bug Tracker" = "https://github.com/Maxwbh/doc2pdf/issues"
+
+[project.scripts]
+doc2pdf-api = "app:main"
+
+[tool.setuptools]
+packages = ["."]
+
+[tool.setuptools.dynamic]
+version = {attr = "version.__version__"}
+
+[tool.black]
+line-length = 100
+target-version = ['py39', 'py310', 'py311', 'py312']
+include = '\.pyi?$'
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "--cov=. --cov-report=html --cov-report=term-missing"
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
