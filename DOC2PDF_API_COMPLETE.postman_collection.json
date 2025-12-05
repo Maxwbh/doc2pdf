@@ -1,0 +1,442 @@
+{
+	"info": {
+		"_postman_id": "doc2pdf-complete-api",
+		"name": "DOC to PDF Converter API - Complete Tests v1.1.2",
+		"description": "Coleção COMPLETA com todos os endpoints e tipos de entrada/saída\n\n**Tipos de Entrada Suportados:**\n- Base64 (DOCX codificado)\n- DOC (bytes do documento)\n\n**Tipos de Saída Suportados:**\n- PDF (arquivo)\n- DOC/DOCX (arquivo)\n- Base64_PDF (PDF em Base64)\n- Base64_DOC (DOCX em Base64)\n\n**Autor:** Maxwell da Silva Oliveira - M&S do Brasil LTDA\n**Email:** maxwbh@gmail.com\n**LinkedIn:** /maxwbh\n**Versão:** 1.1.2",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Health & Info",
+			"item": [
+				{
+					"name": "Health Check",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": ["{{base_url}}"],
+							"path": ["health"]
+						},
+						"description": "Verifica o status da API"
+					}
+				},
+				{
+					"name": "API Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": ["{{base_url}}"],
+							"path": [""]
+						},
+						"description": "Informações completas sobre a API"
+					}
+				}
+			]
+		},
+		{
+			"name": "2. Convert Endpoint (Base64 → PDF → Base64)",
+			"item": [
+				{
+					"name": "Convert - Base64_DOCX Input",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"document\": \"UEsDBBQAAAAIAOWB...[BASE64_DOCX_AQUI]\",\n  \"replacements\": {\n    \"NOME\": \"João da Silva\",\n    \"CPF\": \"123.456.789-00\",\n    \"ENDERECO\": \"Rua Exemplo, 123, São Paulo/SP\",\n    \"DATA\": \"05/12/2025\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": ["{{base_url}}"],
+							"path": ["convert"]
+						},
+						"description": "**Entrada:** Base64 DOCX\n**Saída:** Base64 PDF\n\n**Retorna:**\n```json\n{\n  \"success\": true,\n  \"pdf\": \"JVBERi0xLjQ...\",\n  \"message\": \"Documento convertido com sucesso\"\n}\n```"
+					}
+				},
+				{
+					"name": "Convert - Contrato Exemplo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"document\": \"{{base64_docx_contrato}}\",\n  \"replacements\": {\n    \"CONTRATANTE\": \"Empresa XYZ LTDA\",\n    \"CNPJ_CONTRATANTE\": \"12.345.678/0001-90\",\n    \"CONTRATADO\": \"Maria Santos\",\n    \"CPF_CONTRATADO\": \"987.654.321-00\",\n    \"VALOR\": \"R$ 5.000,00\",\n    \"DATA_INICIO\": \"01/01/2026\",\n    \"DATA_FIM\": \"31/12/2026\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": ["{{base_url}}"],
+							"path": ["convert"]
+						},
+						"description": "Exemplo de contrato com múltiplas tags"
+					}
+				}
+			]
+		},
+		{
+			"name": "3. Convert-File Endpoint (Base64 → PDF File)",
+			"item": [
+				{
+					"name": "Convert-File - Base64_DOCX → PDF File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"document\": \"{{base64_docx}}\",\n  \"replacements\": {\n    \"NOME\": \"Pedro Oliveira\",\n    \"EMAIL\": \"pedro@example.com\",\n    \"TELEFONE\": \"(11) 98765-4321\"\n  },\n  \"filename\": \"certificado_pedro.pdf\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert-file",
+							"host": ["{{base_url}}"],
+							"path": ["convert-file"]
+						},
+						"description": "**Entrada:** Base64 DOCX\n**Saída:** Arquivo PDF (download)\n\nRetorna o PDF diretamente para download/visualização"
+					}
+				},
+				{
+					"name": "Convert-File - Certificado",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"document\": \"{{base64_docx_certificado}}\",\n  \"replacements\": {\n    \"NOME_PARTICIPANTE\": \"Ana Costa\",\n    \"CURSO\": \"Desenvolvimento Python Avançado\",\n    \"CARGA_HORARIA\": \"40 horas\",\n    \"DATA_CONCLUSAO\": \"05/12/2025\",\n    \"INSTRUTOR\": \"Prof. Carlos Silva\"\n  },\n  \"filename\": \"certificado_ana_costa.pdf\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert-file",
+							"host": ["{{base_url}}"],
+							"path": ["convert-file"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "4. Process Endpoint - PDF Output",
+			"item": [
+				{
+					"name": "Process - Base64 → PDF File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"base64\",\n  \"document\": \"{{base64_docx}}\",\n  \"output_type\": \"pdf\",\n  \"replacements\": {\n    \"TITULO\": \"Proposta Comercial\",\n    \"CLIENTE\": \"Tech Solutions LTDA\",\n    \"VALOR_TOTAL\": \"R$ 25.000,00\",\n    \"PRAZO\": \"30 dias\"\n  },\n  \"filename\": \"proposta_tech_solutions\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "**Input:** base64 DOCX\n**Output:** PDF file\n\nRetorna arquivo PDF para download"
+					}
+				},
+				{
+					"name": "Process - DOC → PDF File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"doc\",\n  \"document\": \"{{doc_bytes}}\",\n  \"output_type\": \"pdf\",\n  \"replacements\": {\n    \"CARGO\": \"Desenvolvedor Senior\",\n    \"SALARIO\": \"R$ 12.000,00\",\n    \"DEPARTAMENTO\": \"Tecnologia\"\n  },\n  \"filename\": \"oferta_emprego\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "**Input:** DOC bytes\n**Output:** PDF file"
+					}
+				}
+			]
+		},
+		{
+			"name": "5. Process Endpoint - DOC Output",
+			"item": [
+				{
+					"name": "Process - Base64 → DOCX File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"base64\",\n  \"document\": \"{{base64_docx}}\",\n  \"output_type\": \"doc\",\n  \"replacements\": {\n    \"PROJETO\": \"Sistema de Vendas Online\",\n    \"VERSAO\": \"2.0\",\n    \"DATA_RELEASE\": \"01/01/2026\"\n  },\n  \"filename\": \"release_notes_v2\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "**Input:** base64 DOCX\n**Output:** DOCX file\n\nRetorna documento Word editado para download"
+					}
+				},
+				{
+					"name": "Process - DOC → DOCX File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"doc\",\n  \"document\": \"{{doc_bytes}}\",\n  \"output_type\": \"doc\",\n  \"replacements\": {\n    \"AUTOR\": \"Maxwell Oliveira\",\n    \"REVISAO\": \"3\",\n    \"STATUS\": \"Aprovado\"\n  },\n  \"filename\": \"documento_revisado\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "**Input:** DOC bytes\n**Output:** DOCX file"
+					}
+				}
+			]
+		},
+		{
+			"name": "6. Process Endpoint - Base64_PDF Output",
+			"item": [
+				{
+					"name": "Process - Base64 → Base64_PDF",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"base64\",\n  \"document\": \"{{base64_docx}}\",\n  \"output_type\": \"base64_pdf\",\n  \"replacements\": {\n    \"NUMERO_NF\": \"001234\",\n    \"CLIENTE\": \"ABC Comércio LTDA\",\n    \"VALOR_NF\": \"R$ 10.500,00\",\n    \"DATA_EMISSAO\": \"05/12/2025\"\n  },\n  \"filename\": \"nota_fiscal_001234\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "**Input:** base64 DOCX\n**Output:** Base64 PDF\n\n**Retorna JSON:**\n```json\n{\n  \"success\": true,\n  \"output_type\": \"base64_pdf\",\n  \"document\": \"JVBERi0xLjQ...\",\n  \"filename\": \"nota_fiscal_001234.pdf\",\n  \"size_bytes\": 12345,\n  \"message\": \"Documento processado com sucesso\"\n}\n```"
+					}
+				},
+				{
+					"name": "Process - DOC → Base64_PDF",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"doc\",\n  \"document\": \"{{doc_bytes}}\",\n  \"output_type\": \"base64_pdf\",\n  \"replacements\": {\n    \"PRODUTO\": \"Licença Software Anual\",\n    \"QUANTIDADE\": \"10\",\n    \"PRECO_UNITARIO\": \"R$ 500,00\",\n    \"TOTAL\": \"R$ 5.000,00\"\n  },\n  \"filename\": \"orcamento_licencas\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "**Input:** DOC bytes\n**Output:** Base64 PDF"
+					}
+				}
+			]
+		},
+		{
+			"name": "7. Process Endpoint - Base64_DOC Output",
+			"item": [
+				{
+					"name": "Process - Base64 → Base64_DOC",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"base64\",\n  \"document\": \"{{base64_docx}}\",\n  \"output_type\": \"base64_doc\",\n  \"replacements\": {\n    \"EMPRESA\": \"M&S do Brasil LTDA\",\n    \"ANO\": \"2025\",\n    \"TRIMESTRE\": \"Q4\",\n    \"RECEITA\": \"R$ 1.250.000,00\"\n  },\n  \"filename\": \"relatorio_q4_2025\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "**Input:** base64 DOCX\n**Output:** Base64 DOCX\n\n**Retorna JSON:**\n```json\n{\n  \"success\": true,\n  \"output_type\": \"base64_doc\",\n  \"document\": \"UEsDBBQAAAAI...\",\n  \"filename\": \"relatorio_q4_2025.docx\",\n  \"size_bytes\": 8765,\n  \"message\": \"Documento processado com sucesso\"\n}\n```"
+					}
+				},
+				{
+					"name": "Process - DOC → Base64_DOC",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"doc\",\n  \"document\": \"{{doc_bytes}}\",\n  \"output_type\": \"base64_doc\",\n  \"replacements\": {\n    \"EVENTO\": \"Workshop Python Avançado\",\n    \"LOCAL\": \"São Paulo Convention Center\",\n    \"DATA_EVENTO\": \"15/01/2026\",\n    \"HORARIO\": \"09:00 - 18:00\"\n  },\n  \"filename\": \"convite_workshop\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "**Input:** DOC bytes\n**Output:** Base64 DOCX"
+					}
+				}
+			]
+		},
+		{
+			"name": "8. Testes de Casos Específicos",
+			"item": [
+				{
+					"name": "Múltiplas Tags - Contrato Completo",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"base64\",\n  \"document\": \"{{base64_docx_contrato}}\",\n  \"output_type\": \"pdf\",\n  \"replacements\": {\n    \"CONTRATANTE\": \"Tech Innovations LTDA\",\n    \"CNPJ_CONTRATANTE\": \"45.123.789/0001-55\",\n    \"ENDERECO_CONTRATANTE\": \"Av. Paulista, 1000, São Paulo/SP\",\n    \"CONTRATADO\": \"Lucas Fernandes\",\n    \"CPF_CONTRATADO\": \"456.789.123-00\",\n    \"RG_CONTRATADO\": \"12.345.678-9\",\n    \"ENDERECO_CONTRATADO\": \"Rua das Flores, 50, Rio de Janeiro/RJ\",\n    \"CARGO\": \"Desenvolvedor Full Stack Senior\",\n    \"SALARIO\": \"R$ 15.000,00\",\n    \"DATA_INICIO\": \"01/02/2026\",\n    \"DATA_FIM\": \"31/01/2027\",\n    \"CARGA_HORARIA\": \"40 horas semanais\",\n    \"BENEFICIOS\": \"VT, VR, Plano de Saúde\",\n    \"DATA_ASSINATURA\": \"05/12/2025\"\n  },\n  \"filename\": \"contrato_lucas_fernandes_2026\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "Teste com múltiplas tags (15+ substituições)"
+					}
+				},
+				{
+					"name": "Tags com Caracteres Especiais",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"base64\",\n  \"document\": \"{{base64_docx}}\",\n  \"output_type\": \"base64_pdf\",\n  \"replacements\": {\n    \"NOME\": \"José Antônio Côrrea\",\n    \"DESCRICAO\": \"Análise & Desenvolvimento de Software\",\n    \"OBSERVACAO\": \"100% remoto - Ótimas condições!\",\n    \"VALOR\": \"R$ 8.500,00 (oito mil e quinhentos reais)\"\n  },\n  \"filename\": \"proposta_jose_antonio\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "Teste com acentuação, símbolos e caracteres especiais"
+					}
+				},
+				{
+					"name": "Documento Grande - Tabelas",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"input_type\": \"base64\",\n  \"document\": \"{{base64_docx_tabelas}}\",\n  \"output_type\": \"pdf\",\n  \"replacements\": {\n    \"MES_REF\": \"Dezembro/2025\",\n    \"TOTAL_VENDAS\": \"R$ 250.000,00\",\n    \"TOTAL_DESPESAS\": \"R$ 180.000,00\",\n    \"LUCRO_LIQUIDO\": \"R$ 70.000,00\",\n    \"MARGEM\": \"28%\"\n  },\n  \"filename\": \"relatorio_financeiro_dez_2025\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": ["{{base_url}}"],
+							"path": ["process"]
+						},
+						"description": "Teste com documento contendo tabelas complexas"
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "base64_docx",
+			"value": "UEsDBBQAAAAIAA==",
+			"type": "string",
+			"description": "Base64 de um DOCX com tags para substituição"
+		},
+		{
+			"key": "base64_docx_contrato",
+			"value": "UEsDBBQAAAAIAA==",
+			"type": "string",
+			"description": "Base64 de template de contrato"
+		},
+		{
+			"key": "base64_docx_certificado",
+			"value": "UEsDBBQAAAAIAA==",
+			"type": "string",
+			"description": "Base64 de template de certificado"
+		},
+		{
+			"key": "base64_docx_tabelas",
+			"value": "UEsDBBQAAAAIAA==",
+			"type": "string",
+			"description": "Base64 de documento com tabelas"
+		},
+		{
+			"key": "doc_bytes",
+			"value": "bytes_content_here",
+			"type": "string",
+			"description": "Bytes do documento DOC"
+		}
+	]
+}

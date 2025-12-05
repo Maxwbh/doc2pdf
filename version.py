@@ -1,6 +1,6 @@
 """Informações de versão do DOC2PDF API"""
 
-__version__ = "1.1.2"
+__version__ = "1.2.0"
 __author__ = "Maxwell da Silva Oliveira"
 __email__ = "maxwbh@gmail.com"
 __license__ = "MIT"

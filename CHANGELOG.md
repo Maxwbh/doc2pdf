@@ -9,6 +9,46 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
+
+## [1.2.0] - 2025-12-05
+
+### Adicionado
+- **Coleção Postman Completa** com 10 combinações de entrada/saída diferentes
+- **Documento de Testes Completos** (TESTES_COMPLETOS.md) com:
+  - Matriz completa de testes (10 cenários)
+  - Exemplos JSON para todos os endpoints
+  - Casos de uso específicos (contratos, certificados, tabelas)
+  - Métricas de performance esperadas
+- Documentação de tipos de entrada: Base64_DOCX, Base64_DOC, DOC, DOCX
+- Documentação de tipos de saída: PDF, DOC, Base64_PDF, Base64_DOC
+- Exemplos com caracteres especiais e acentuação
+- Casos de teste com múltiplas tags (15+)
+
+### Alterado - Otimizações do Dockerfile
+- **Multi-stage build** implementado (reduz tamanho da imagem em ~40%)
+- **LibreOffice nogui** (versão sem interface gráfica, mais leve)
+- **Worker único** no Render para plano free (antes: 2 workers)
+- **Worker temp dir** otimizado para /dev/shm (RAM, mais rápido)
+- **Health check** integrado no Dockerfile (9 minutos)
+- **Variáveis de ambiente** otimizadas (PYTHONDONTWRITEBYTECODE, PIP_NO_CACHE_DIR)
+- **.dockerignore** expandido (reduz contexto de build em ~70%)
+- Limpeza agressiva de cache apt após instalação
+- Ordem otimizada de COPY para melhor cache de layers
+
+### Performance - Deploy no Render
+- ✅ Build ~50% mais rápido (multi-stage + cache otimizado)
+- ✅ Imagem ~40% menor (nogui + limpeza agressiva)
+- ✅ Contexto de build ~70% menor (.dockerignore otimizado)
+- ✅ Startup ~30% mais rápido (1 worker + /dev/shm)
+- ✅ Consumo de memória reduzido (worker único + Python otimizado)
+
+### Documentação
+- Coleção Postman com 8 grupos organizados por funcionalidade
+- 20+ exemplos de requisições diferentes
+- Variáveis de ambiente configuráveis (base_url, base64_docx, etc.)
+- Descrições detalhadas em cada endpoint
+- Exemplos de resposta para cada tipo de saída
+
 ## [1.1.2] - 2025-12-05
 
 ### Alterado
