@@ -18,7 +18,7 @@ services:
       - FLASK_ENV=production
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
-      interval: 30s
+      interval: 9m
       timeout: 10s
       retries: 3
       start_period: 40s
@@ -32,7 +32,7 @@ services:
     labels:
       - "com.docker2pdf.description=API Flask para conversão DOC to PDF"
       - "com.docker2pdf.author=Maxwell da Silva Oliveira"
-      - "com.docker2pdf.version=1.0.3"
+      - "com.docker2pdf.version=1.1.1"
     deploy:
       resources:
         limits:

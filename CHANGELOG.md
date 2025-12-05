@@ -8,6 +8,18 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
+
+## [1.1.2] - 2025-12-05
+
+### Alterado
+- Intervalo do health check no docker-compose.yml alterado de 30s para 9 minutos
+- Reduz carga de verificações desnecessárias do Docker
+- Label de versão no docker-compose.yml atualizado para 1.1.1
+
+### Otimizações
+- Menor consumo de recursos com health checks menos frequentes
+- Mantém monitoramento adequado com intervalo de 9 minutos
+
 ## [1.1.1] - 2025-12-05
 
 ### Corrigido
