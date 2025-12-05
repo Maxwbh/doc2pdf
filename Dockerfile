@@ -1,6 +1,6 @@
 # Dockerfile otimizado para API DOC to PDF
 # Autor: Maxwell da Silva Oliveira - M&S do Brasil LTDA
-# Versão: 1.1.2 - Otimizado para deploy rápido no Render
+# Versão: 1.4.0 - LibreOffice com opções avançadas de qualidade PDF
 
 # ============================================
 # Stage 1: Builder - Prepara dependências
@@ -24,13 +24,21 @@ FROM python:3.11-slim
 # Define diretório de trabalho
 WORKDIR /app
 
-# Instala apenas LibreOffice essencial (sem recomendações)
+# Instala LibreOffice essencial + fontes e ferramentas de PDF
 # Usa --no-install-recommends para reduzir tamanho
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libreoffice-writer-nogui \
     libreoffice-core-nogui \
+    # Fontes essenciais para melhor renderização
     fonts-liberation \
+    fonts-dejavu-core \
+    fonts-liberation2 \
+    fonts-noto-core \
+    fonts-freefont-ttf \
+    # Ferramentas de sistema
     curl \
+    # Ghostscript para otimização adicional de PDF (opcional)
+    ghostscript \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* \
@@ -53,7 +61,14 @@ EXPOSE 5000
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    # LibreOffice - Otimizações
+    SAL_USE_VCLPLUGIN=svp \
+    HOME=/tmp \
+    # Desabilita screensaver e animações
+    DISPLAY= \
+    # Melhora performance de conversão
+    OOO_DISABLE_RECOVERY=1
 
 # Health check otimizado (9 minutos)
 HEALTHCHECK --interval=9m --timeout=10s --start-period=40s --retries=3 \

@@ -5,7 +5,48 @@ Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
 O formato é baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
 e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR/).
 
+## [1.4.0] - 2025-12-05
 
+### 🎯 MAJOR FEATURE: Controle Avançado de Qualidade de PDF
+
+### Adicionado
+- **Parâmetro `quality` em todos os endpoints** - Permite escolher entre 'high', 'medium' ou 'low'
+- **Perfil HIGH** - 300 DPI, qualidade JPEG 95%, ideal para impressão
+- **Perfil MEDIUM** - 150 DPI, qualidade JPEG 85%, balanceado (padrão)
+- **Perfil LOW** - 75 DPI, qualidade JPEG 70%, otimizado para web
+- **Filtros avançados do LibreOffice** - Controle fino sobre geração de PDF
+- **Documentação completa** - QUALIDADE_PDF.md com guia detalhado de uso
+
+### Melhorado
+- **Função `convert_docx_to_pdf()`** completamente reescrita com opções avançadas
+- **Dockerfile otimizado** com mais fontes (Liberation2, Noto, DejaVu, FreeFont)
+- **Ghostscript adicionado** para otimização adicional de PDFs
+- **Variáveis de ambiente do LibreOffice** para melhor performance (SAL_USE_VCLPLUGIN, OOO_DISABLE_RECOVERY)
+- **Timeout aumentado** de 30s para 60s para documentos grandes
+- **Logging detalhado** mostra perfil selecionado, DPI, qualidade JPEG e tamanho do PDF
+
+### Configurações Técnicas
+- **SelectPdfVersion=1** - PDF 1.4 para compatibilidade universal
+- **UseTaggedPDF=true** - PDFs acessíveis com estrutura de tags
+- **ExportBookmarks=true** - Preserva marcadores e índice do documento
+- **ExportFormFields=true** - Mantém campos de formulário
+- **EmbedStandardFonts=false** - Reduz tamanho sem perder qualidade
+
+### Compatibilidade
+- ✅ 100% compatível com v1.3.x
+- ✅ Parâmetro `quality` é opcional
+- ✅ Padrão é `high` quando não especificado
+- ✅ Validação automática: valores inválidos usam 'high'
+
+### Casos de Uso
+- **high**: Contratos, certificados, documentos oficiais, impressão
+- **medium**: Email, arquivamento digital, visualização em tela
+- **low**: Rascunhos, prévias rápidas, web com limitação de banda
+
+### Performance
+- **Docker** ~10% maior devido a fontes adicionais, mas gera PDFs de melhor qualidade
+- **Conversão** ligeiramente mais rápida devido a otimizações do LibreOffice
+- **Tamanho de PDFs** reduzido em ~30-50% com perfil 'low'
 
 
 

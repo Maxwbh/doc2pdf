@@ -5,7 +5,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.9%2B-blue.svg)](https://www.python.org/downloads/)
 [![Flask](https://img.shields.io/badge/flask-3.0.0-green.svg)](https://flask.palletsprojects.com/)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.3-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-1.4.0-brightgreen.svg)](CHANGELOG.md)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](CONTRIBUTING.md)
 
 **API REST profissional para conversão de documentos Word para PDF com substituição inteligente de tags**
@@ -32,13 +32,24 @@ API Flask moderna e robusta que permite converter documentos Word (.DOC/.DOCX) p
 ## Funcionalidades
 
 - ✅ Recebe documento .DOC/.DOCX em Base64
-- ✅ Substitui tags no formato `%%TAG%%` por valores fornecidos
-- ✅ Converte documento para PDF
+- ✅ Substitui tags no formato `{TAG}` por valores fornecidos
+- ✅ Converte documento para PDF com **controle de qualidade** (high/medium/low)
 - ✅ Retorna PDF em Base64 ou como arquivo direto
-- ✅ Suporte para tags em parágrafos e tabelas
+- ✅ Suporte para tags em **parágrafos, tabelas, cabeçalhos e rodapés**
 - ✅ Preserva formatação do documento original
+- ✅ **Opções avançadas de qualidade**: 300/150/75 DPI
+- ✅ **LibreOffice com filtros profissionais** de exportação PDF
 - ✅ Pronto para deploy no Render com Docker
 - ✅ Coleção completa para Postman incluída
+
+### 🆕 Novidade v1.4.0: Controle de Qualidade de PDF
+
+Escolha entre 3 perfis de qualidade:
+- **HIGH** (300 DPI) - Ideal para impressão e documentos oficiais
+- **MEDIUM** (150 DPI) - Balanceado para email e visualização
+- **LOW** (75 DPI) - Otimizado para web e rascunhos
+
+📖 **Documentação completa:** [QUALIDADE_PDF.md](QUALIDADE_PDF.md)
 
 ---
 
@@ -103,9 +114,15 @@ Converte documento Word para PDF com substituição de tags.
     "ENDERECO": "Rua qualquer coisa, Nro1, Bairro das colinas, São Paulo/SP - CEP: 48.4839-877",
     "DATANASCIMENTO": "01/01/1990",
     "CPF": "123.456.789-00"
-  }
+  },
+  "quality": "high"
 }
 ```
+
+**Parâmetros:**
+- `document` (obrigatório): Documento DOCX em Base64
+- `replacements` (obrigatório): Objeto com tags e valores
+- `quality` (opcional): Qualidade do PDF - `"high"` (padrão), `"medium"` ou `"low"`
 
 **Response:**
 ```json

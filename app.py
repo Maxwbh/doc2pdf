@@ -233,34 +233,102 @@ def replace_tags_in_doc(doc_bytes, replacements):
         raise ValueError(f"Erro ao processar documento Word: {str(e)}")
 
 
-def convert_docx_to_pdf(docx_path, pdf_path):
+def convert_docx_to_pdf(docx_path, pdf_path, quality='high'):
     """
-    Converte documento DOCX para PDF usando LibreOffice
+    Converte documento DOCX para PDF usando LibreOffice com opções avançadas de qualidade
 
     Args:
         docx_path: Caminho do arquivo DOCX
         pdf_path: Caminho onde salvar o PDF
+        quality: Qualidade do PDF ('high', 'medium', 'low')
+            - high: 300 DPI, sem compressão de imagem, ideal para impressão
+            - medium: 150 DPI, compressão moderada, balanceado (padrão)
+            - low: 75 DPI, alta compressão, menor tamanho de arquivo
     """
     try:
-        # Usa LibreOffice para conversão (disponível no Docker)
+        logger.info(f"Iniciando conversão PDF com qualidade: {quality}")
+
+        # Configurações de qualidade por perfil
+        quality_settings = {
+            'high': {
+                'MaxImageResolution': 300,
+                'Quality': 95,
+                'ReduceImageResolution': False,
+                'description': 'Alta qualidade - ideal para impressão'
+            },
+            'medium': {
+                'MaxImageResolution': 150,
+                'Quality': 85,
+                'ReduceImageResolution': True,
+                'description': 'Qualidade média - balanceado'
+            },
+            'low': {
+                'MaxImageResolution': 75,
+                'Quality': 70,
+                'ReduceImageResolution': True,
+                'description': 'Baixa qualidade - menor tamanho'
+            }
+        }
+
+        # Usa 'medium' como padrão se qualidade não reconhecida
+        settings = quality_settings.get(quality, quality_settings['medium'])
+        logger.info(f"Perfil selecionado: {settings['description']}")
+        logger.info(f"Resolução máxima: {settings['MaxImageResolution']} DPI")
+        logger.info(f"Qualidade JPEG: {settings['Quality']}%")
+
+        # Monta filtro avançado para LibreOffice
+        # Formato: writer_pdf_Export:{opcao1:valor1,opcao2:valor2}
+        pdf_filter_options = [
+            f"SelectPdfVersion=1",  # PDF 1.4 (compatível)
+            f"UseTaggedPDF=true",   # PDF acessível com tags
+            f"ExportBookmarks=true",  # Exporta marcadores/índice
+            f"ExportNotes=false",   # Não exporta comentários
+            f"Quality={settings['Quality']}",  # Qualidade de compressão JPEG
+            f"ReduceImageResolution={str(settings['ReduceImageResolution']).lower()}",
+            f"MaxImageResolution={settings['MaxImageResolution']}",
+            f"ExportFormFields=true",  # Exporta campos de formulário
+            f"FormsType=0",  # FDF format
+            f"EmbedStandardFonts=false",  # Não embute fontes padrão (reduz tamanho)
+        ]
+
+        # Junta todas as opções em uma string
+        filter_data = ":".join(pdf_filter_options)
+        convert_format = f"pdf:writer_pdf_Export:{{{filter_data}}}"
+
+        logger.info(f"Executando LibreOffice com filtro customizado...")
+
+        # Comando LibreOffice com opções avançadas
+        cmd = [
+            'libreoffice',
+            '--headless',           # Modo sem interface
+            '--invisible',          # Completamente invisível
+            '--nocrashreport',      # Não envia crash reports
+            '--nodefault',          # Não carrega documento padrão
+            '--nofirststartwizard', # Pula wizard de primeira execução
+            '--nolockcheck',        # Não verifica locks de arquivo
+            '--nologo',             # Não mostra logo
+            '--norestore',          # Não restaura sessão anterior
+            '--convert-to', convert_format,
+            '--outdir', os.path.dirname(pdf_path),
+            docx_path
+        ]
+
+        # Executa conversão
         result = subprocess.run(
-            [
-                'libreoffice',
-                '--headless',
-                '--convert-to',
-                'pdf',
-                '--outdir',
-                os.path.dirname(pdf_path),
-                docx_path
-            ],
+            cmd,
             capture_output=True,
             text=True,
-            timeout=30
+            timeout=60,  # Aumentado para 60s para documentos grandes
+            env={**os.environ, 'HOME': '/tmp'}  # Define HOME temporário
         )
 
         if result.returncode != 0:
-            logger.error(f"Erro LibreOffice: {result.stderr}")
+            logger.error(f"Erro LibreOffice (código {result.returncode})")
+            logger.error(f"STDOUT: {result.stdout}")
+            logger.error(f"STDERR: {result.stderr}")
             raise Exception(f"Erro na conversão para PDF: {result.stderr}")
+
+        logger.info(f"LibreOffice output: {result.stdout}")
 
         # LibreOffice salva com o mesmo nome base do arquivo de entrada
         generated_pdf = os.path.join(
@@ -268,12 +336,22 @@ def convert_docx_to_pdf(docx_path, pdf_path):
             os.path.splitext(os.path.basename(docx_path))[0] + '.pdf'
         )
 
+        # Verifica se PDF foi gerado
+        if not os.path.exists(generated_pdf):
+            raise Exception(f"PDF não foi gerado. Arquivo esperado: {generated_pdf}")
+
+        # Obtém tamanho do PDF gerado
+        pdf_size = os.path.getsize(generated_pdf)
+        logger.info(f"PDF gerado com sucesso: {pdf_size / 1024:.2f} KB")
+
         # Renomeia se necessário
-        if generated_pdf != pdf_path and os.path.exists(generated_pdf):
+        if generated_pdf != pdf_path:
             os.rename(generated_pdf, pdf_path)
+            logger.info(f"PDF renomeado para: {os.path.basename(pdf_path)}")
 
     except subprocess.TimeoutExpired:
-        raise Exception("Timeout na conversão do documento")
+        logger.error("Timeout na conversão do documento (limite: 60s)")
+        raise Exception("Timeout na conversão do documento. O documento pode ser muito grande ou complexo.")
     except Exception as e:
         logger.error(f"Erro na conversão: {str(e)}")
         raise
@@ -317,14 +395,21 @@ def convert_document():
 
         document_base64 = data['document']
         replacements = data['replacements']
+        quality = data.get('quality', 'high')  # 'high', 'medium' ou 'low' (padrão: 'high')
 
         # Valida que replacements é um dicionário
         if not isinstance(replacements, dict):
             logger.warning("Requisição rejeitada: replacements inválido")
             return jsonify({'error': 'Campo "replacements" deve ser um objeto JSON'}), 400
 
+        # Valida qualidade
+        if quality not in ['high', 'medium', 'low']:
+            logger.warning(f"Qualidade inválida '{quality}', usando 'high'")
+            quality = 'high'
+
         logger.info(f"✓ Validação OK - {len(replacements)} substituições encontradas")
         logger.info(f"Tags a substituir: {list(replacements.keys())}")
+        logger.info(f"Qualidade do PDF: {quality}")
 
         # Decodifica o documento
         logger.info("Etapa 1/4: Decodificando documento Base64...")
@@ -354,7 +439,7 @@ def convert_document():
             # Converte para PDF
             logger.info("Etapa 4/4: Convertendo DOCX para PDF...")
             start_convert = time.time()
-            convert_docx_to_pdf(docx_path, pdf_path)
+            convert_docx_to_pdf(docx_path, pdf_path, quality=quality)
 
             # Verifica se o PDF foi gerado
             if not os.path.exists(pdf_path):
@@ -423,6 +508,7 @@ def convert_document_file():
         document_base64 = data['document']
         replacements = data['replacements']
         filename = data.get('filename', 'documento.pdf')
+        quality = data.get('quality', 'high')  # 'high', 'medium' ou 'low' (padrão: 'high')
 
         # Garante que o filename termina com .pdf
         if not filename.endswith('.pdf'):
@@ -433,9 +519,15 @@ def convert_document_file():
             logger.warning("Requisição rejeitada: replacements inválido")
             return jsonify({'error': 'Campo "replacements" deve ser um objeto JSON'}), 400
 
+        # Valida qualidade
+        if quality not in ['high', 'medium', 'low']:
+            logger.warning(f"Qualidade inválida '{quality}', usando 'high'")
+            quality = 'high'
+
         logger.info(f"✓ Validação OK - {len(replacements)} substituições encontradas")
         logger.info(f"Tags a substituir: {list(replacements.keys())}")
         logger.info(f"Nome do arquivo de saída: {filename}")
+        logger.info(f"Qualidade do PDF: {quality}")
 
         # Decodifica o documento
         logger.info("Etapa 1/4: Decodificando documento Base64...")
@@ -465,7 +557,7 @@ def convert_document_file():
         # Converte para PDF
         logger.info("Etapa 4/4: Convertendo DOCX para PDF...")
         start_convert = time.time()
-        convert_docx_to_pdf(docx_path, pdf_path)
+        convert_docx_to_pdf(docx_path, pdf_path, quality=quality)
 
         # Verifica se o PDF foi gerado
         if not os.path.exists(pdf_path):
@@ -544,6 +636,7 @@ def process_document():
         document_data = data['document']
         replacements = data['replacements']
         filename = data.get('filename', 'documento')
+        quality = data.get('quality', 'high')  # 'high', 'medium' ou 'low' (padrão: 'high')
 
         # Valida tipos
         valid_input_types = ['base64', 'doc']
@@ -563,8 +656,13 @@ def process_document():
             logger.warning("Requisição rejeitada: replacements inválido")
             return jsonify({'error': 'Campo "replacements" deve ser um objeto JSON'}), 400
 
+        # Valida qualidade
+        if quality not in ['high', 'medium', 'low']:
+            logger.warning(f"Qualidade inválida '{quality}', usando 'high'")
+            quality = 'high'
+
         logger.info(f"✓ Validação OK")
-        logger.info(f"Configuração: input_type={input_type}, output_type={output_type}")
+        logger.info(f"Configuração: input_type={input_type}, output_type={output_type}, quality={quality}")
         logger.info(f"Substituições: {len(replacements)} tags - {list(replacements.keys())}")
         logger.info(f"Nome do arquivo: {filename}")
 
@@ -601,7 +699,7 @@ def process_document():
             logger.info("Etapa 4/4: Convertendo para PDF e retornando arquivo...")
             start_output = time.time()
             pdf_path = os.path.join(temp_dir, 'document.pdf')
-            convert_docx_to_pdf(docx_path, pdf_path)
+            convert_docx_to_pdf(docx_path, pdf_path, quality=quality)
 
             if not os.path.exists(pdf_path):
                 logger.error("ERRO: PDF não foi gerado pelo LibreOffice")
@@ -652,7 +750,7 @@ def process_document():
 
             logger.info("Sub-etapa 4a: Convertendo DOCX para PDF...")
             start_convert = time.time()
-            convert_docx_to_pdf(docx_path, pdf_path)
+            convert_docx_to_pdf(docx_path, pdf_path, quality=quality)
 
             if not os.path.exists(pdf_path):
                 logger.error("ERRO: PDF não foi gerado pelo LibreOffice")
