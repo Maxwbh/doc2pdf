@@ -84,13 +84,17 @@ def create_app():
     from app.routes.convert import convert_bp
     from app.routes.convert_file import convert_file_bp
     from app.routes.process import process_bp
+    from app.routes.swagger import swagger_bp, swaggerui_blueprint
 
     app.register_blueprint(health_bp)
     app.register_blueprint(convert_bp)
     app.register_blueprint(convert_file_bp)
     app.register_blueprint(process_bp)
+    app.register_blueprint(swagger_bp)
+    app.register_blueprint(swaggerui_blueprint)
 
-    logger.info("✓ Blueprints registrados: health, convert, convert_file, process")
+    logger.info("✓ Blueprints registrados: health, convert, convert_file, process, swagger")
+    logger.info("✓ Documentação Swagger disponível em: /api/docs")
     logger.info("✓ Aplicação pronta para receber requisições")
 
     return app

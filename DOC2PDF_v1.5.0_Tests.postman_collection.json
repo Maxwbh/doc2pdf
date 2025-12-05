@@ -1,0 +1,531 @@
+{
+	"info": {
+		"_postman_id": "doc2pdf-v1-5-0-tests",
+		"name": "DOC2PDF API v1.5.0 - Automated Tests",
+		"description": "Collection completa com testes automatizados para API DOC2PDF v1.5.0\n\n**Autor:** Maxwell da Silva Oliveira - M&S do Brasil LTDA\n**Email:** maxwbh@gmail.com\n**Versão:** 1.5.0\n\n## Funcionalidades Testadas\n- ✅ Health checks\n- ✅ Validação de entrada\n- ✅ Conversão com diferentes qualidades\n- ✅ Substituição de tags\n- ✅ Tratamento de erros\n- ✅ Performance\n\n## Como Usar\n1. Configure a variável `base_url` (ex: http://localhost:5000)\n2. Execute a collection com Newman ou Postman Runner\n3. Veja os resultados dos testes",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Health & Info",
+			"item": [
+				{
+					"name": "Health Check",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response tem estrutura correta\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('status');",
+									"    pm.expect(jsonData).to.have.property('service');",
+									"    pm.expect(jsonData).to.have.property('version');",
+									"});",
+									"",
+									"pm.test(\"Status é 'healthy'\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.status).to.eql('healthy');",
+									"});",
+									"",
+									"pm.test(\"Versão é 1.5.0\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.version).to.eql('1.5.0');",
+									"});",
+									"",
+									"pm.test(\"Response time menor que 500ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(500);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/health",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "API Info",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Retorna informações da API\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('name');",
+									"    pm.expect(jsonData).to.have.property('version');",
+									"    pm.expect(jsonData).to.have.property('endpoints');",
+									"    pm.expect(jsonData).to.have.property('quality_profiles');",
+									"});",
+									"",
+									"pm.test(\"Endpoints disponíveis estão listados\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.endpoints).to.have.property('convert');",
+									"    pm.expect(jsonData.endpoints).to.have.property('convert_file');",
+									"    pm.expect(jsonData.endpoints).to.have.property('process');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								""
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "2. Validações de Erro",
+			"item": [
+				{
+					"name": "Erro - Content-Type inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Mensagem de erro correta\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('error');",
+									"    pm.expect(jsonData.error).to.include('application/json');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "text/plain"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "invalid"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Erro - Campo document faltando",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Mensagem indica campo faltando\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('document');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"replacements\": {\"TAG\": \"valor\"}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Erro - Base64 inválido",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 400\", function () {",
+									"    pm.response.to.have.status(400);",
+									"});",
+									"",
+									"pm.test(\"Erro de Base64 inválido\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.error).to.include('Base64');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": \"INVALID_BASE64!!!\",\n    \"replacements\": {\"TAG\": \"valor\"}\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "3. Conversão - Qualidade",
+			"item": [
+				{
+					"name": "Conversão - HIGH quality",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Response contém PDF\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('success');",
+									"    pm.expect(jsonData).to.have.property('pdf');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});",
+									"",
+									"pm.test(\"Qualidade é HIGH\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.stats.quality).to.eql('high');",
+									"});",
+									"",
+									"pm.test(\"Processing time registrado\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('processing_time');",
+									"    pm.expect(jsonData.processing_time).to.be.above(0);",
+									"});",
+									"",
+									"pm.test(\"PDF Base64 é válido\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.pdf).to.match(/^[A-Za-z0-9+/]+=*$/);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": \"{{sample_docx_base64}}\",\n    \"replacements\": {\n        \"NOME\": \"João Silva\",\n        \"CPF\": \"123.456.789-00\"\n    },\n    \"quality\": \"high\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Conversão - MEDIUM quality",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Qualidade é MEDIUM\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.stats.quality).to.eql('medium');",
+									"});",
+									"",
+									"pm.test(\"PDF gerado com sucesso\", function () {",
+									"    pm.response.to.have.status(200);",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": \"{{sample_docx_base64}}\",\n    \"replacements\": {\"TAG\": \"valor\"},\n    \"quality\": \"medium\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Conversão - LOW quality",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Qualidade é LOW\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData.stats.quality).to.eql('low');",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": \"{{sample_docx_base64}}\",\n    \"replacements\": {\"TAG\": \"valor\"},\n    \"quality\": \"low\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "4. Endpoints Diferentes",
+			"item": [
+				{
+					"name": "/convert-file - Retorna arquivo",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code é 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type é PDF\", function () {",
+									"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/pdf');",
+									"});",
+									"",
+									"pm.test(\"Content-Disposition contém filename\", function () {",
+									"    pm.expect(pm.response.headers.get('Content-Disposition')).to.include('attachment');",
+									"});",
+									"",
+									"pm.test(\"Response não é vazio\", function () {",
+									"    pm.expect(pm.response.text().length).to.be.above(0);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": \"{{sample_docx_base64}}\",\n    \"replacements\": {\"NOME\": \"Maria Santos\"},\n    \"filename\": \"teste.pdf\",\n    \"quality\": \"medium\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/convert-file",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"convert-file"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/process - output_type=base64_pdf",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Response contém PDF em Base64\", function () {",
+									"    var jsonData = pm.response.json();",
+									"    pm.expect(jsonData).to.have.property('pdf');",
+									"    pm.expect(jsonData.success).to.be.true;",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"document\": \"{{sample_docx_base64}}\",\n    \"replacements\": {\"TAG\": \"valor\"},\n    \"input_type\": \"base64\",\n    \"output_type\": \"base64_pdf\",\n    \"quality\": \"low\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/process",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"process"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:5000",
+			"type": "string"
+		},
+		{
+			"key": "sample_docx_base64",
+			"value": "UEsDBBQABgAIAAAAIQBi7p1oXgEAAJAEAAATAAgCW0NvbnRlbnRfVHlwZXNdLnhtbCCiBAIooAAC",
+			"type": "string"
+		}
+	]
+}
