@@ -89,6 +89,40 @@ def decode_base64_file(base64_string):
         raise ValueError("String Base64 inválida")
 
 
+def validate_docx_format(doc_bytes):
+    """
+    Valida se os bytes são de um arquivo DOCX válido
+
+    Args:
+        doc_bytes: Bytes do documento
+
+    Returns:
+        tuple: (is_valid, error_message)
+    """
+    # DOCX é um arquivo ZIP que começa com PK (50 4B)
+    if len(doc_bytes) < 4:
+        return False, "Arquivo muito pequeno para ser um DOCX válido"
+
+    # Verifica assinatura ZIP (DOCX files)
+    if doc_bytes[0:2] == b'PK':
+        logger.info("✓ Formato DOCX detectado (arquivo ZIP)")
+        return True, None
+
+    # Verifica assinatura de arquivo DOC antigo (D0 CF 11 E0)
+    if doc_bytes[0:4] == b'\xD0\xCF\x11\xE0':
+        logger.warning("⚠ Arquivo .DOC (formato antigo) detectado")
+        return False, "Formato .DOC (Word 97-2003) não suportado. Por favor, converta para .DOCX primeiro"
+
+    # Verifica se começa com texto (possível erro de encoding)
+    if doc_bytes[0:5].decode('utf-8', errors='ignore').isprintable():
+        logger.warning("⚠ Arquivo parece ser texto puro")
+        return False, "Arquivo parece não ser um documento Word. Certifique-se de enviar um arquivo .DOCX válido em Base64"
+
+    # Formato desconhecido
+    logger.warning(f"⚠ Formato desconhecido. Primeiros bytes: {doc_bytes[0:4].hex()}")
+    return False, "Formato de arquivo não reconhecido. Apenas arquivos .DOCX (Word 2007+) são suportados"
+
+
 def replace_tags_in_doc(doc_bytes, replacements):
     """
     Substitui tags no documento Word pelos valores fornecidos
@@ -101,6 +135,12 @@ def replace_tags_in_doc(doc_bytes, replacements):
         Document: Documento modificado
     """
     try:
+        # Valida o formato do documento antes de processar
+        is_valid, error_msg = validate_docx_format(doc_bytes)
+        if not is_valid:
+            logger.error(f"Validação de formato falhou: {error_msg}")
+            raise ValueError(error_msg)
+
         # Abre o documento a partir dos bytes
         doc = Document(io.BytesIO(doc_bytes))
 

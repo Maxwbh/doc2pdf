@@ -10,6 +10,25 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
+
+## [1.2.1] - 2025-12-05
+
+### Adicionado
+- Função `validate_docx_format()` para validação de formato de arquivo antes do processamento
+- Detecção automática de formato de arquivo (.DOC antigo vs .DOCX)
+- Mensagens de erro específicas para cada tipo de problema de formato
+
+### Corrigido
+- Erro "File is not a zip file" agora mostra mensagem clara sobre o formato esperado
+- Validação de arquivo .DOC (Word 97-2003) com mensagem orientando conversão para .DOCX
+- Detecção de arquivos de texto puro enviados incorretamente
+- Logging detalhado dos primeiros bytes do arquivo para debug
+
+### Melhorias
+- Mensagens de erro mais claras e orientadas à solução
+- Validação de formato antes de tentar processar o documento
+- Suporte a diagnóstico de problemas de encoding
+
 ## [1.2.0] - 2025-12-05
 
 ### Adicionado
