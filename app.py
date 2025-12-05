@@ -40,11 +40,16 @@ logger.info(f"Desenvolvido por: {__author__} - {__company__}")
 logger.info(f"="*60)
 
 
-# Middleware para logging de requisições
+# Middleware para logging de requisições (otimizado para Render)
 @app.before_request
 def log_request():
-    """Log detalhado de cada requisição"""
+    """Log detalhado de cada requisição (filtra health checks)"""
     request.start_time = time.time()
+
+    # Ignora logs detalhados de health checks para reduzir ruído no Render
+    if request.path == '/health':
+        return  # Não loga health checks
+
     logger.info(f">>> NOVA REQUISIÇÃO")
     logger.info(f"Método: {request.method}")
     logger.info(f"Endpoint: {request.path}")
@@ -58,7 +63,11 @@ def log_request():
 
 @app.after_request
 def log_response(response):
-    """Log da resposta e tempo de processamento"""
+    """Log da resposta e tempo de processamento (filtra health checks)"""
+    # Ignora logs detalhados de health checks
+    if request.path == '/health':
+        return response
+
     if hasattr(request, 'start_time'):
         duration = time.time() - request.start_time
         logger.info(f"<<< RESPOSTA ENVIADA")
