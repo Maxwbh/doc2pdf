@@ -22,6 +22,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copia código da aplicação
 COPY app.py .
+COPY version.py .
 
 # Expõe porta (Render usa PORT environment variable)
 EXPOSE 5000
