@@ -7,6 +7,14 @@ e este projeto adere ao [Versionamento Semântico](https://semver.org/lang/pt-BR
 
 
 
+
+## [1.1.1] - 2025-12-05
+
+### Corrigido
+- Dockerfile agora copia o arquivo `version.py` corretamente para o container
+- Correção do erro `ModuleNotFoundError: No module named 'version'` em produção no Render
+- Deploy no Render agora funciona corretamente com o sistema de versionamento
+
 ## [1.1.0] - 2025-12-05
 
 ### Adicionado
