@@ -28,6 +28,17 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
+# Headers de segurança
+@app.after_request
+def add_security_headers(response):
+    """Adiciona headers de segurança em todas as respostas"""
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    return response
+
+
 def decode_base64_file(base64_string):
     """Decodifica string Base64 para bytes"""
     try:

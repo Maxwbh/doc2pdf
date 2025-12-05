@@ -33,19 +33,8 @@ services:
     # Configurações do Container
     numInstances: 1
 
-    # Headers customizados (opcional)
-    headers:
-      - path: /*
-        name: X-Frame-Options
-        value: DENY
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /*
-        name: X-XSS-Protection
-        value: 1; mode=block
-
-    # CORS (já configurado no Flask)
+    # Headers de segurança configurados no Flask (app.py)
+    # X-Frame-Options, X-Content-Type-Options, etc.
 
     # Notificações (opcional)
     # notifications:

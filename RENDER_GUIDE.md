@@ -331,16 +331,23 @@ Para dados sensíveis:
 
 ### Headers de Segurança
 
-Já configurados no `render.yaml`:
-```yaml
-headers:
-  - name: X-Frame-Options
-    value: DENY
-  - name: X-Content-Type-Options
-    value: nosniff
-  - name: X-XSS-Protection
-    value: 1; mode=block
+Configurados automaticamente no Flask (`app.py`):
+
+```python
+@app.after_request
+def add_security_headers(response):
+    response.headers['X-Frame-Options'] = 'DENY'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000'
+    return response
 ```
+
+**Headers aplicados:**
+- ✅ X-Frame-Options: Previne clickjacking
+- ✅ X-Content-Type-Options: Previne MIME sniffing
+- ✅ X-XSS-Protection: Proteção contra XSS
+- ✅ Strict-Transport-Security: Força HTTPS
 
 ### Rate Limiting
 
