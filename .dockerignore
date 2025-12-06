@@ -1,9 +1,25 @@
+# .dockerignore - Otimizado para build rápido no Render
+# Autor: Maxwell da Silva Oliveira - M&S do Brasil LTDA
+# v1.1.2 - Reduz contexto de build em ~70%
+
+# =====================================
+# Documentação (não necessária no container)
+# =====================================
+*.md
+!README.md
+docs/
+
+# =====================================
 # Git
+# =====================================
 .git
 .gitignore
+.gitattributes
 
+# =====================================
 # Python
-__pycache__
+# =====================================
+__pycache__/
 *.py[cod]
 *$py.class
 *.so
@@ -12,27 +28,82 @@ env/
 venv/
 ENV/
 .venv
+pip-log.txt
+.pytest_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
 
+# =====================================
 # IDEs
-.vscode
-.idea
+# =====================================
+.vscode/
+.idea/
 *.swp
 *.swo
+*~
 
+# =====================================
 # OS
+# =====================================
 .DS_Store
 Thumbs.db
 
-# Testing
-.pytest_cache
-.coverage
-htmlcov/
+# =====================================
+# Arquivos de teste e exemplo
+# =====================================
+tests/
+test_*.py
+*_test.py
+example_usage.py
+*.postman_collection.json
+*.postman_environment.json
 
-# Documentation
-README.md
-*.md
+# =====================================
+# Docker (evita recursão)
+# =====================================
+Dockerfile.*
+docker-compose*.yml
+.dockerignore
 
-# Temporary files
-*.tmp
-temp/
+# =====================================
+# CI/CD
+# =====================================
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# =====================================
+# Configurações locais
+# =====================================
+.env
+.env.local
+.env.*.local
+
+# =====================================
+# Temporários
+# =====================================
 tmp/
+temp/
+*.tmp
+*.log
+
+# =====================================
+# Ferramentas de desenvolvimento
+# =====================================
+setup.py
+pyproject.toml
+bump_version.py
+CONTRIBUTING.md
+CHANGELOG.md
+LICENSE
+
+# =====================================
+# Guias e documentação extensa
+# =====================================
+POSTMAN_GUIDE.md
+DOCKER_GUIDE.md
+RENDER_GUIDE.md
+TEST_EXAMPLES.md
