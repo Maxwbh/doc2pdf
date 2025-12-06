@@ -78,7 +78,7 @@ docker-compose up -d
 
 ```bash
 pip install git+https://github.com/Maxwbh/doc2pdf.git
-python app.py
+python wsgi.py
 ```
 
 ---
@@ -434,7 +434,7 @@ brew install libreoffice
 
 5. Execute a aplicação:
 ```bash
-python app.py
+python wsgi.py
 ```
 
 A API estará disponível em `http://localhost:5000`
@@ -480,8 +480,10 @@ curl https://sua-api.render.com/
 
 ```
 doc2pdf/
-├── app.py              # Aplicação Flask principal
-├── requirements.txt    # Dependências Python
+├── wsgi.py            # Entry point WSGI para produção
+├── app/               # Aplicação Flask modular (factory pattern)
+├── config/            # Configurações centralizadas
+├── requirements.txt   # Dependências Python
 ├── Dockerfile         # Configuração Docker
 ├── .dockerignore      # Arquivos ignorados pelo Docker
 └── README.md          # Esta documentação
