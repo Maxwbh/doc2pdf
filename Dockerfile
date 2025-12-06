@@ -1,24 +1,7 @@
 # Dockerfile otimizado para API DOC to PDF
 # Autor: Maxwell da Silva Oliveira - M&S do Brasil LTDA
-# Versão: 1.5.0 - Código modularizado e profissional
+# Versão: 1.5.2 - Simplificado e robusto para Render
 
-# ============================================
-# Stage 1: Builder - Prepara dependências
-# ============================================
-FROM python:3.11-slim as builder
-
-# Define diretório de trabalho
-WORKDIR /app
-
-# Copia apenas requirements primeiro (cache de layer)
-COPY requirements.txt .
-
-# Instala dependências em um diretório separado
-RUN pip install --no-cache-dir --user -r requirements.txt
-
-# ============================================
-# Stage 2: Runtime - Imagem final otimizada
-# ============================================
 FROM python:3.11-slim
 
 # Define diretório de trabalho
@@ -37,20 +20,21 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-freefont-ttf \
     # Ferramentas de sistema
     curl \
-    # Ghostscript para otimização adicional de PDF (opcional)
+    # Ghostscript para otimização adicional de PDF
     ghostscript \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* \
     && rm -rf /tmp/* \
     && rm -rf /var/tmp/*
 
-# Copia dependências Python do builder
-COPY --from=builder /root/.local /root/.local
+# Copia requirements primeiro (melhor cache)
+COPY requirements.txt .
 
-# Adiciona .local/bin ao PATH
-ENV PATH=/root/.local/bin:$PATH
+# Instala dependências Python
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Copia estrutura modular da aplicação (ordem otimizada para cache)
+# Copia estrutura modular da aplicação
 COPY version.py .
 COPY config/ ./config/
 COPY app/ ./app/
@@ -77,7 +61,6 @@ HEALTHCHECK --interval=9m --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:${PORT:-5000}/health || exit 1
 
 # Comando otimizado para iniciar a aplicação
-# Reduz workers para 1 no plano free do Render
 CMD gunicorn --bind 0.0.0.0:$PORT \
     --workers 1 \
     --threads 4 \
