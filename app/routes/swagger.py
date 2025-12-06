@@ -32,7 +32,7 @@ def serve_openapi_spec():
     """Serve o arquivo OpenAPI YAML"""
     # Obtém o diretório raiz do projeto
     root_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    return send_from_directory(root_dir, 'openapi.yaml')
+    return send_from_directory(root_dir, 'docs', 'api', 'openapi.yaml')
 
 
 @swagger_bp.route('/api/openapi.json')
@@ -42,7 +42,7 @@ def serve_openapi_json():
     import json
 
     root_dir = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))
-    yaml_path = os.path.join(root_dir, 'openapi.yaml')
+    yaml_path = os.path.join(root_dir, 'docs', 'api', 'openapi.yaml')
 
     with open(yaml_path, 'r', encoding='utf-8') as f:
         spec = yaml.safe_load(f)
