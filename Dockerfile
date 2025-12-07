@@ -38,7 +38,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
 COPY version.py .
 COPY config/ ./config/
 COPY app/ ./app/
-COPY app.py .
+COPY wsgi.py .
 
 # Expõe porta (Render usa PORT environment variable)
 EXPOSE 5000
@@ -70,4 +70,4 @@ CMD gunicorn --bind 0.0.0.0:$PORT \
     --access-logfile - \
     --error-logfile - \
     --log-level info \
-    app:app
+    wsgi:app

@@ -1,15 +1,18 @@
 """
-DOC2PDF Converter API - Entry Point
+DOC2PDF Converter API - WSGI Entry Point
 
 API REST profissional para conversão de documentos Word para PDF
 com substituição inteligente de tags.
+
+Este arquivo é o ponto de entrada WSGI para servidores de produção (Gunicorn).
+Para desenvolvimento, use: python wsgi.py
 
 Autor: Maxwell da Silva Oliveira
 Email: maxwbh@gmail.com
 Empresa: M&S do Brasil LTDA
 LinkedIn: /maxwbh
 
-Versão: 1.5.0
+Versão: 1.5.2
 """
 from app import create_app
 
