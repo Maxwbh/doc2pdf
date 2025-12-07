@@ -26,7 +26,7 @@ services:
       - doc2pdf-network
     volumes:
       # Opcional: Para desenvolvimento com hot-reload
-      # - ./app.py:/app/app.py:ro
+      # - ./wsgi.py:/app/wsgi.py:ro
       # - ./version.py:/app/version.py:ro
       - /tmp/doc2pdf:/tmp/doc2pdf
     labels:

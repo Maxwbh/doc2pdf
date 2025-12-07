@@ -33,7 +33,7 @@ services:
     # Configurações do Container
     numInstances: 1
 
-    # Headers de segurança configurados no Flask (app.py)
+    # Headers de segurança configurados no Flask (wsgi.py + app/__init__.py)
     # X-Frame-Options, X-Content-Type-Options, etc.
 
     # Notificações (opcional)
