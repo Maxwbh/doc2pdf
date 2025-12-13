@@ -8,16 +8,16 @@ Versão: 1.5.2
 """
 import pytest
 import base64
-from app.utils.encoders import encode_file_to_base64, decode_base64_file
+from app.utils.encoders import encode_base64_file, decode_base64_file
 from werkzeug.exceptions import BadRequest
 
 
 class TestEncodeFileToBase64:
-    """Testes para encode_file_to_base64()"""
+    """Testes para encode_base64_file()"""
 
     def test_encode_docx_file(self, lista_vendas_bytes):
         """Deve codificar bytes DOCX para Base64"""
-        result = encode_file_to_base64(lista_vendas_bytes)
+        result = encode_base64_file(lista_vendas_bytes)
 
         assert isinstance(result, str)
         assert len(result) > 0
@@ -27,13 +27,13 @@ class TestEncodeFileToBase64:
 
     def test_encode_empty_bytes(self):
         """Deve codificar bytes vazios"""
-        result = encode_file_to_base64(b'')
+        result = encode_base64_file(b'')
         assert result == ''
 
     def test_encode_small_bytes(self):
         """Deve codificar bytes pequenos"""
         test_bytes = b'Hello World'
-        result = encode_file_to_base64(test_bytes)
+        result = encode_base64_file(test_bytes)
 
         # Decodifica e verifica
         decoded = base64.b64decode(result)
@@ -42,14 +42,14 @@ class TestEncodeFileToBase64:
     def test_encode_binary_data(self):
         """Deve codificar dados binários"""
         binary_data = bytes([0, 1, 2, 3, 255, 254, 253])
-        result = encode_file_to_base64(binary_data)
+        result = encode_base64_file(binary_data)
 
         decoded = base64.b64decode(result)
         assert decoded == binary_data
 
     def test_encode_large_file(self, complex_doc_bytes):
         """Deve codificar arquivos grandes"""
-        result = encode_file_to_base64(complex_doc_bytes)
+        result = encode_base64_file(complex_doc_bytes)
 
         assert isinstance(result, str)
         decoded = base64.b64decode(result)
@@ -57,7 +57,7 @@ class TestEncodeFileToBase64:
 
     def test_encode_returns_string(self, lista_vendas_bytes):
         """Deve retornar string, não bytes"""
-        result = encode_file_to_base64(lista_vendas_bytes)
+        result = encode_base64_file(lista_vendas_bytes)
         assert isinstance(result, str)
         assert not isinstance(result, bytes)
 
@@ -127,21 +127,21 @@ class TestEncodersRoundTrip:
 
     def test_roundtrip_lista_vendas(self, lista_vendas_bytes):
         """Deve fazer roundtrip completo com ListaVendas.docx"""
-        encoded = encode_file_to_base64(lista_vendas_bytes)
+        encoded = encode_base64_file(lista_vendas_bytes)
         decoded = decode_base64_file(encoded)
 
         assert decoded == lista_vendas_bytes
 
     def test_roundtrip_simple_doc(self, simple_doc_bytes):
         """Deve fazer roundtrip completo com simple.docx"""
-        encoded = encode_file_to_base64(simple_doc_bytes)
+        encoded = encode_base64_file(simple_doc_bytes)
         decoded = decode_base64_file(encoded)
 
         assert decoded == simple_doc_bytes
 
     def test_roundtrip_complex_doc(self, complex_doc_bytes):
         """Deve fazer roundtrip completo com complex.docx"""
-        encoded = encode_file_to_base64(complex_doc_bytes)
+        encoded = encode_base64_file(complex_doc_bytes)
         decoded = decode_base64_file(encoded)
 
         assert decoded == complex_doc_bytes
@@ -149,7 +149,7 @@ class TestEncodersRoundTrip:
     def test_roundtrip_empty(self):
         """Deve fazer roundtrip com bytes vazios"""
         empty_bytes = b''
-        encoded = encode_file_to_base64(empty_bytes)
+        encoded = encode_base64_file(empty_bytes)
         decoded = decode_base64_file(encoded) if encoded else b''
 
         assert decoded == empty_bytes
@@ -157,7 +157,7 @@ class TestEncodersRoundTrip:
     def test_roundtrip_binary_data(self):
         """Deve fazer roundtrip com dados binários"""
         binary_data = bytes(range(256))
-        encoded = encode_file_to_base64(binary_data)
+        encoded = encode_base64_file(binary_data)
         decoded = decode_base64_file(encoded)
 
         assert decoded == binary_data
@@ -167,7 +167,7 @@ class TestEncodersRoundTrip:
         # DOCX é um ZIP, deve começar com PK
         assert lista_vendas_bytes.startswith(b'PK')
 
-        encoded = encode_file_to_base64(lista_vendas_bytes)
+        encoded = encode_base64_file(lista_vendas_bytes)
         decoded = decode_base64_file(encoded)
 
         # Deve preservar o header ZIP
@@ -181,7 +181,7 @@ class TestEncodersEdgeCases:
     def test_encode_large_file(self):
         """Deve codificar arquivo grande (> 1MB)"""
         large_bytes = b'X' * (1024 * 1024)  # 1MB
-        result = encode_file_to_base64(large_bytes)
+        result = encode_base64_file(large_bytes)
 
         assert isinstance(result, str)
         assert len(result) > 0
@@ -197,7 +197,7 @@ class TestEncodersEdgeCases:
     def test_encode_unicode_not_supported(self):
         """Deve rejeitar string Unicode (deve receber bytes)"""
         with pytest.raises((TypeError, AttributeError)):
-            encode_file_to_base64("string unicode não bytes")
+            encode_base64_file("string unicode não bytes")
 
     def test_decode_non_ascii_characters(self):
         """Deve lidar com caracteres não-ASCII em Base64"""
@@ -216,9 +216,9 @@ class TestEncodersConsistency:
 
     def test_encode_decode_idempotent(self, lista_vendas_bytes):
         """Encode/decode deve ser idempotente"""
-        encoded1 = encode_file_to_base64(lista_vendas_bytes)
+        encoded1 = encode_base64_file(lista_vendas_bytes)
         decoded1 = decode_base64_file(encoded1)
-        encoded2 = encode_file_to_base64(decoded1)
+        encoded2 = encode_base64_file(decoded1)
         decoded2 = decode_base64_file(encoded2)
 
         assert encoded1 == encoded2
@@ -227,8 +227,8 @@ class TestEncodersConsistency:
 
     def test_multiple_files_same_encoding(self, lista_vendas_bytes, simple_doc_bytes):
         """Diferentes arquivos devem ter encodings diferentes"""
-        encoded1 = encode_file_to_base64(lista_vendas_bytes)
-        encoded2 = encode_file_to_base64(simple_doc_bytes)
+        encoded1 = encode_base64_file(lista_vendas_bytes)
+        encoded2 = encode_base64_file(simple_doc_bytes)
 
         # Devem ser diferentes
         assert encoded1 != encoded2
