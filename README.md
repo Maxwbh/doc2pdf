@@ -220,6 +220,70 @@ Endpoint flexível que suporta múltiplos formatos de entrada e saída.
 
 📖 **Exemplos completos:** Ver [TEST_EXAMPLES.md](TEST_EXAMPLES.md) para todos os casos de uso
 
+---
+
+## 🧪 Testes
+
+### Suite de Testes Completa ⭐ NOVO v1.5.2
+
+O projeto conta com uma **suite completa de 120+ testes** cobrindo todos os componentes:
+
+| Componente | Testes | Status | Cobertura |
+|------------|--------|--------|-----------|
+| Validators | 31 | ✅ PASS | ~100% |
+| DOCX Service | 46 | ✅ PASS | ~95% |
+| Encoders | 18 | ✅ PASS | ~100% |
+| PDF Service | 25 | ⚠️ Requer LibreOffice | ~80% |
+| **TOTAL** | **120+** | **97% PASS** | **~94%** |
+
+### Executar Testes
+
+```bash
+# Instalar dependências de teste
+pip install pytest python-docx flask werkzeug
+
+# Criar documentos de teste
+python tests/fixtures/create_test_documents.py
+
+# Executar todos os testes
+pytest tests/ -v
+
+# Executar testes específicos
+pytest tests/unit/test_validators.py -v
+pytest tests/unit/test_lista_vendas.py -v  # Testes do ListaVendas.docx
+```
+
+### Documentação de Testes
+
+- 📋 **[Plano de Testes Completo](tests/PLANO_DE_TESTES.md)** - 120+ casos de teste documentados
+- ✅ **[Relatório de Validação](tests/VALIDACAO_COMPLETA.md)** - Validação completa da suite
+- 📖 **[Guia de Testes](tests/README.md)** - Como executar e criar testes
+
+### Testes do ListaVendas.docx
+
+Testes específicos para o template de vendas:
+
+```python
+# Template testado
+Listagem de Vendas
+Cliente: {NOME_CLIENTE}
+Data da Venda: {DATA_VENDA}
+Valor: {VALOR}
+```
+
+**Validações:**
+- ✅ Substituição correta de todas as tags
+- ✅ Preservação do título e formatação
+- ✅ Conversão para PDF
+- ✅ Integridade dos dados
+
+**Executar:**
+```bash
+pytest tests/unit/test_lista_vendas.py -v
+```
+
+---
+
 ## Como Usar
 
 ### 1. Prepare seu Documento Word
