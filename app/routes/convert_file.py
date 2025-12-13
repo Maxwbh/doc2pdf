@@ -46,13 +46,9 @@ def convert_file():
             return jsonify({'error': ERROR_MESSAGES['missing_replacements']}), 400
 
         document_base64 = data['document']
-        replacements = data['replacements']
+        replacements = validate_replacements(data['replacements'])
         filename = validate_filename(data.get('filename', 'documento.pdf'))
         quality = validate_quality(data.get('quality', 'high'))
-
-        is_valid, error_msg = validate_replacements(replacements)
-        if not is_valid:
-            return jsonify({'error': error_msg}), 400
 
         logger.info(f"✓ Validação OK - {len(replacements)} substituições")
         logger.info(f"Arquivo de saída: {filename}")

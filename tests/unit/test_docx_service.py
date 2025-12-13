@@ -7,8 +7,9 @@ Autor: Maxwell da Silva Oliveira - M&S do Brasil LTDA
 Versão: 1.5.2
 """
 import pytest
-from docx import Document
 import io
+from docx import Document
+from docx.document import Document as DocumentType
 from app.services.docx_service import DocxService
 
 
@@ -22,7 +23,7 @@ class TestReplaceTagsInDoc:
             replacements_lista_vendas
         )
 
-        assert isinstance(result_doc, Document)
+        assert isinstance(result_doc, DocumentType)
 
         # Extrai todo o texto do documento
         text = '\n'.join([p.text for p in result_doc.paragraphs])
@@ -109,7 +110,7 @@ class TestReplaceTagsInDoc:
             {}
         )
 
-        assert isinstance(result_doc, Document)
+        assert isinstance(result_doc, DocumentType)
 
         # Documento deve ainda conter as tags originais
         text = '\n'.join([p.text for p in result_doc.paragraphs])
@@ -257,7 +258,7 @@ class TestDocxServiceEdgeCases:
             {'TAG': 'valor'}
         )
 
-        assert isinstance(result_doc, Document)
+        assert isinstance(result_doc, DocumentType)
 
     def test_replace_tags_nonexistent_tag(self, lista_vendas_bytes):
         """Deve ignorar tags que não existem no documento"""
@@ -271,7 +272,7 @@ class TestDocxServiceEdgeCases:
             replacements
         )
 
-        assert isinstance(result_doc, Document)
+        assert isinstance(result_doc, DocumentType)
 
     def test_replace_tags_very_long_value(self, lista_vendas_bytes):
         """Deve substituir com valores muito longos"""

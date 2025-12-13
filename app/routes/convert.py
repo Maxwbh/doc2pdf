@@ -58,13 +58,8 @@ def convert():
             return jsonify({'error': ERROR_MESSAGES['missing_replacements']}), 400
 
         document_base64 = data['document']
-        replacements = data['replacements']
+        replacements = validate_replacements(data['replacements'])
         quality = validate_quality(data.get('quality', 'high'))
-
-        # Valida replacements
-        is_valid, error_msg = validate_replacements(replacements)
-        if not is_valid:
-            return jsonify({'error': error_msg}), 400
 
         logger.info(f"✓ Validação OK - {len(replacements)} substituições encontradas")
         logger.info(f"Tags a substituir: {list(replacements.keys())}")
