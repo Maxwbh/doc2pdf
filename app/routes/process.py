@@ -48,7 +48,7 @@ def process():
         input_type = data.get('input_type', 'base64').lower()
         output_type = data.get('output_type', 'pdf').lower()
         document_data = data['document']
-        replacements = data['replacements']
+        replacements = validate_replacements(data['replacements'])
         filename = data.get('filename', 'documento')
         quality = validate_quality(data.get('quality', 'high'))
 
@@ -61,10 +61,6 @@ def process():
 
         if output_type not in valid_output_types:
             return jsonify({'error': f'output_type inválido. Use: {", ".join(valid_output_types)}'}), 400
-
-        is_valid, error_msg = validate_replacements(replacements)
-        if not is_valid:
-            return jsonify({'error': error_msg}), 400
 
         logger.info(f"✓ Configuração: input={input_type}, output={output_type}, quality={quality}")
 
